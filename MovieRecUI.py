@@ -72,6 +72,9 @@ class DataSet:
         self.df_ratmat = pd.read_csv("movielens/Movielens-02/data_matrix.csv", index_col=0)
         
         self.max_user_id = self.df_user["user_id"].max()
+
+        # Reading data for testing the genre recommender method
+        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
         
         # read user data
         try:
@@ -117,6 +120,27 @@ class DataSet:
             return user
         # then search in user list
         return self._search_user(id)
+
+    ###transforming data to be used with cos sim in genre recommender method
+    #vectorizer to be used when creating the tfidf matrix
+    tfidf_movies_genres = TfidfVectorizer(token_pattern = '[a-zA-Z0-9\-]+')
+    #replacing empty values
+    dataset_copy['genres'] = dataset_copy['genres'].replace(to_replace="(no genres listed)", value="")
+    #creating the tfidf matrix
+    tfidf_movies_genres_matrix = tfidf_movies_genres.fit_transform(dataset_copy['genres'])
+    #computing the cosine similarity
+    cosine_sim_movies = linear_kernel(tfidf_movies_genres_matrix, tfidf_movies_genres_matrix)
+
+    ### recommend movies based on similar genres
+    def genre_recommender(movie_title, cosine_sim_movies=cosine_sim_movies):
+        movie_index = dataset_copy.loc[dataset_copy['title'].isin([movie_title])]
+        movie_index = movie_index.index
+        movies_sim_scores = list(enumerate(cosine_sim_movies[indx_movie][0]))
+        movies_sim_scores = sorted(movies_sim_scores, key=lambda x: x[1], reverse=True)
+        movies_sim_scores = movies_sim_scores[1:11]
+        movie_indices = [i[0] for i in movies_sim_scores]
+    
+        return dataset_copy['title'].iloc[movie_indices]
     
     def search_movie_by_title(self, title):
         if self.df_movie.empty:
