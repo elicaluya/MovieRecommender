@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import *
-from tkinter.ttk import *
+from tkinter import messagebox
 import numpy as np
 import pandas as pd
 import math
@@ -240,7 +240,7 @@ class App:
         
         # Create GUI
         self.window = tk.Tk()
-
+        self.window.geometry('400x400')
     
     def user_input(self, prompt):
         val = input(prompt)
@@ -249,9 +249,17 @@ class App:
     # Starting window asking for new or returning user
     def log_in(self):
         title = tk.Label(self.window,text="Movie Recommender System").pack()
-        return_button = tk.Button(self.window, text="Returning User", command=lambda : self.return_user()).pack()
+        return_button = tk.Button(self.window, text="Returning User", command=lambda : self.return_user_window()).pack()
         new_button = tk.Button(self.window, text="New User", command=lambda : self.new_user()).pack()
-        quit_button = tk.Button(self.window, text="Quit", command=lambda : self.window.destroy()).pack()
+        self.by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
+        self.by_rating.pack()
+        self.by_genre = tk.Button(self.window, text="Recommend Movie by Genre")
+        self.by_genre.pack()
+        self.chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
+        self.chg_user.pack()
+        self.quit_button = tk.Button(self.window, text="Quit", command=lambda : self.window.destroy())
+        self.quit_button.pack()
+        self.hide_menu()
 
         #
         # Brad's code
@@ -273,8 +281,23 @@ class App:
         #         print("User id not found")
         # return None
     
+    def hide_menu(self):
+        self.by_rating.pack_forget()
+        self.by_genre.pack_forget()
+        self.chg_user.pack_forget()
+        
+        
+    def show_menu(self):
+        self.quit_button.pack_forget()
+        self.by_rating.pack()
+        self.by_genre.pack()
+        self.chg_user.pack()
+        self.chg_user.pack()
+        self.quit_button.pack()
+        
+    
     # Method for input of user id of returning user
-    def return_user(self):
+    def return_user_window(self):
         self.window = Toplevel(self.window)
         label = tk.Label(self.window, text="Please enter User ID:").pack()
         self.uid = tk.Entry(self.window)
@@ -285,17 +308,19 @@ class App:
     # Check if input is valid for user id
     def valid_userid(self):
         uid = self.uid.get()
-        newWindow = Toplevel(self.window)
         if uid.isnumeric() == False:
-            
-            tk.Label(newWindow, text="Invalid User ID (Must only contain numbers)").pack()
-            tk.Button(newWindow, text="OK", command=lambda : newWindow.withdraw()).pack()
+            tk.messagebox.showerror("Error","Invalid User ID (Must only contain numbers)")
         else:
-            newWindow.withdraw()
-            self.window.withdraw()
-            self.main_menu()
+            user = self.dataset.search_user(uid)
+            if  user:
+                self.window.withdraw()
+                self.user = user
+                self.show_menu()
+            else:
+                tk.messagebox.showerror("Error", "User Not Found")
+                
     
-    # MEthod for input of info for new user
+    # Method for input of info for new user
     def new_user(self):
         self.window = Toplevel(self.window)
         label = tk.Label(self.window, text="Please Enter the Following Info:")
@@ -323,7 +348,7 @@ class App:
         name = self.name_entry.get()
         age =  self.age_entry.get()
         gender = self.gen_entry.get()
-        
+
         err_msg = ""
         
         if name.isalpha() == False:
@@ -336,11 +361,11 @@ class App:
             err_msg += "- Gender must be M or F \n"
             
         if len(err_msg) > 0:
-            newWindow = Toplevel(self.window)
-            tk.Label(newWindow, text=err_msg).pack()
-            tk.Button(newWindow, text="OK", command=lambda: newWindow.withdraw()).pack()
+            tk.messagebox.showerror("Error", err_msg)
         else:
-            self.main_menu()
+            self.window.withdraw()
+            self.show_menu()
+            self.dataset.add_user(name, age, gender)
     
     
     # Window for the main menu with buttons corresponding to each option
@@ -349,11 +374,11 @@ class App:
         self.window = Toplevel(self.window)
         label = tk.Label(self.window, text="Main Menu")
         label.grid(row=0)
-        by_rating = tk.Button(self.window, text="Recommend Movie by Rating")
+        by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
         by_rating.grid(row=1)
         by_genre = tk.Button(self.window, text="Recommend Movie by Genre")
         by_genre.grid(row=2)
-        chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user())
+        chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
         chg_user.grid(row=3)
         quit = tk.Button(self.window,text="Quit", command=lambda : self.window.destroy())
         quit.grid(row=4)
@@ -379,16 +404,37 @@ class App:
         #         return func
         # return None
     
+    
+    # Method to display recommend by rating window
+    def rec_rating_window(self):
+        self.window = Toplevel(self.window)
+        label = tk.Label(self.window, text="Recommend By Rating:")
+        label.grid(row=0)
+        movie_label = tk.Label(self.window, text="Movie Title:")
+        movie_label.grid(row=1)
+        self.movie_entry = tk.Entry(self.window)
+        self.movie_entry.grid(row=1, column=1)
+        submit_btn = tk.Button(self.window, text="Submit", command=lambda : self.input_movie())
+        submit_btn.grid(row=3, column=1)
+    
+    
     def input_movie(self):
-        while True:
-            title = self.user_input("Type in a movie title or [q for quit function]:")
-            if title == 'q':
-                break
-            found_movie = self.dataset.search_movie_by_title(title)
-            if found_movie:
-                return found_movie
-            print("Movie is not found")
-        return None
+        movie = self.movie_entry.get()
+        found_movie = self.dataset.search_movie_by_title(movie)
+        if not found_movie:
+            tk.messagebox.showerror("Error", "Movie Not Found")
+        else:
+            self.recommend_rating(found_movie)
+        
+        # while True:
+        #     title = self.user_input("Type in a movie title or [q for quit function]:")
+        #     if title == 'q':
+        #         break
+        #     found_movie = self.dataset.search_movie_by_title(title)
+        #     if found_movie:
+        #         return found_movie
+        #     print("Movie is not found")
+        # return None
     
     def input_genre(self):
         # not supported yet
