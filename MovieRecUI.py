@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import math
 from sklearn.neighbors import NearestNeighbors, KNeighborsClassifier
+from sklearn.decomposition import NMF
 
 
 class Movie:
@@ -201,7 +202,30 @@ class DataSet:
             total += score * rating
             total_score += score
         print("expected rating ===>", total / total_score)
-
+    
+    def rating_by_nmf(self, user_id, movie_id):
+        user_w_movie = self.df_ratmat[self.df_ratmat.iloc[:,movie_id - 1] > 0]
+        n_users = min(10, user_w_movie.shape[0])
+        if n_users < 1:
+            print("No ratings found with your movie")
+            return
+        movies_rated = self.df_app_data.loc[(self.df_app_data["user_id"] == int(user_id)) & ((self.df_app_data["rating"].isna() == False))]
+        movie_size = self.df_ratmat.shape[1]
+        cols = [str(i) for i in range(1, movie_size + 1)]
+        df = pd.DataFrame(columns=cols)
+        new_row = {}
+        for i, r in movies_rated[['item_id', 'rating']].iterrows():
+            new_row[str(int(r['item_id']))] = int(r['rating'])
+        df = df.append(new_row, ignore_index = True)
+        df = df.fillna(0)
+        temp_df = self.df_ratmat.append(df)
+        nmf = NMF(100)
+        W = nmf.fit_transform(temp_df)
+        H = nmf.components_
+        h = H[:,movie_id]
+        w = W[user_id]
+        print("movie_id ===>", movie_id)
+        print("expected rating ===>", np.dot(w, h)) 
 
 
 #
@@ -473,7 +497,8 @@ class App:
             print("user count =", count)
             if count >= self.num_of_movie_need_rating:
                 print("user rating count is bigger than needed, here's the expected rating for your movie")
-                self.dataset.recommend_rating(self.user.get_id(), movie.get_id())
+                #self.dataset.recommend_rating(self.user.get_id(), movie.get_id())
+                self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id())
                 return
             else:
                 print("user rating count is less than needed, please input your rating for the following movie")
