@@ -257,6 +257,7 @@ class Knn:
         distances, indices = self.neighbor(X, K)
         return 0.0
 
+#Implementation in progress. 
 class Genre_Based:
     def __init__(self, movie_title, dataset):
         self.movie_title = movie_title
@@ -283,8 +284,7 @@ class Genre_Based:
         movie_indices = [i[0] for i in movies_sim_scores]
     
         return self.dataset['title'].iloc[movie_indices]
-
-
+    
 
 #
 # Main GUI class where App is run
