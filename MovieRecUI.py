@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 import math
 from sklearn.neighbors import NearestNeighbors, KNeighborsClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
 from sklearn.decomposition import NMF
 
 
