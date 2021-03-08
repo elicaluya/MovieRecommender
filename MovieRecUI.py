@@ -257,7 +257,7 @@ class Knn:
         distances, indices = self.neighbor(X, K)
         return 0.0
 
-#Implementation in progress. 
+#Recommendation based on similar genre 
 class Genre_Based:
     def __init__(self, movie_title, dataset):
         self.movie_title = movie_title
@@ -273,17 +273,24 @@ class Genre_Based:
         tfidf_movies_genres_matrix = tfidf_movies_genres.fit_transform(self.dataset['genres'])
         #computing the cosine similarity
         cosine_sim_movies = linear_kernel(tfidf_movies_genres_matrix, tfidf_movies_genres_matrix)
+        return cosine_sim_movies
 
     ### recommend movies based on similar genres
-    def genre_recommender(self, movie_title, cosine_sim_movies):
-        movie_index = self.dataset.loc[self.dataset['title'].isin([movie_title])]
+    def genre_recommender(self):
+        #computing the cosine similarity and storing locally
+        cosine_sim_movies = self.tfidf_prep()
+        #variable to store index of movie that the user has specified
+        movie_index = self.dataset.loc[self.dataset['title'].isin([self.movie_title])]
         movie_index = movie_index.index
+        #computing the similarity score and then sorting based on the score
         movies_sim_scores = list(enumerate(cosine_sim_movies[movie_index][0]))
         movies_sim_scores = sorted(movies_sim_scores, key=lambda x: x[1], reverse=True)
-        movies_sim_scores = movies_sim_scores[1:11]
+        #fetch score of the most similar movies and get their movie index to be used when printing out result to user
+        movies_sim_scores = movies_sim_scores[1:21]
         movie_indices = [i[0] for i in movies_sim_scores]
-    
-        return self.dataset['title'].iloc[movie_indices]
+
+        #outputting results sorted by ratings
+        return print(self.dataset[['title','genres','rating']].iloc[movie_indices].sort_values('rating', ascending=False))
     
 
 #
@@ -574,6 +581,11 @@ def main():
     app = App(60)
     app.run()
     tk.mainloop()
+
+    ###For testing genre based
+    # df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
+    # genre_test = Genre_Based("Toy Story (1995)", df_movie_genre)
+    # genre_test.genre_recommender()
 
 if __name__ == "__main__":
     main()
