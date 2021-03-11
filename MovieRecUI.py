@@ -212,8 +212,8 @@ class DataSet:
         user_w_movie = self.df_ratmat[self.df_ratmat.iloc[:,movie_id - 1] > 0]
         n_users = min(10, user_w_movie.shape[0])
         if n_users < 1:
-            print("No ratings found with your movie")
-            return
+            #print("No ratings found with your movie")
+            return "No ratings found with your movie"
         movies_rated = self.df_app_data.loc[(self.df_app_data["user_id"] == int(user_id)) & ((self.df_app_data["rating"].isna() == False))]
         movie_size = self.df_ratmat.shape[1]
         cols = [str(i) for i in range(1, movie_size + 1)]
@@ -229,9 +229,12 @@ class DataSet:
         H = nmf.components_
         h = H[:,movie_id]
         w = W[user_id]
-        print("movie_id ===>", movie_id)
-        print("expected rating ===>", np.dot(w, h)) 
-
+        
+        #print("movie_id ===>", movie_id)
+        #print("expected rating ===>", np.dot(w, h))
+        mov = "movie_id ===>", movie_id, "\n"
+        rating = "expected rating ===>", np.dot(w, h)
+        return mov + rating
 
 #
 # KNN class
@@ -303,7 +306,7 @@ class App:
         
         # Create GUI
         self.window = tk.Tk()
-        self.window.geometry('400x400')
+        self.window.geometry('500x500')
     
     def user_input(self, prompt):
         val = input(prompt)
@@ -312,14 +315,18 @@ class App:
     # Starting window asking for new or returning user
     def log_in(self):
         title = tk.Label(self.window,text="Movie Recommender System").pack()
-        return_button = tk.Button(self.window, text="Returning User", command=lambda : self.return_user_window()).pack()
-        new_button = tk.Button(self.window, text="New User", command=lambda : self.new_user()).pack()
+        self.return_button = tk.Button(self.window, text="Returning User", command=lambda : self.return_user_window())
+        self.return_button.pack()
+        self.new_button = tk.Button(self.window, text="New User", command=lambda : self.new_user())
+        self.new_button.pack()
         self.by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
         self.by_rating.pack()
         self.by_genre = tk.Button(self.window, text="Recommend Movie by Genre")
         self.by_genre.pack()
         self.chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
         self.chg_user.pack()
+        self.status_label = tk.Label(self.window, text="")
+        self.status_label.pack()
         self.quit_button = tk.Button(self.window, text="Quit", command=lambda : self.window.destroy())
         self.quit_button.pack()
         self.hide_menu()
@@ -348,36 +355,45 @@ class App:
         self.by_rating.pack_forget()
         self.by_genre.pack_forget()
         self.chg_user.pack_forget()
+        self.status_label.pack_forget()
         
         
     def show_menu(self):
+        self.return_button.pack_forget()
+        self.new_button.pack_forget()
         self.quit_button.pack_forget()
         self.by_rating.pack()
         self.by_genre.pack()
         self.chg_user.pack()
         self.chg_user.pack()
         self.quit_button.pack()
-        
+        self.status_label.pack()
+    
+    # Function to update the status label
+    def update_status(self, status):
+        self.status_label.config(text=status)
     
     # Method for input of user id of returning user
     def return_user_window(self):
-        self.window = Toplevel(self.window)
-        label = tk.Label(self.window, text="Please enter User ID:").pack()
-        self.uid = tk.Entry(self.window)
+        newWindow = Toplevel(self.window)
+        label = tk.Label(newWindow, text="Please enter User ID:").pack()
+        self.uid = tk.Entry(newWindow)
         self.uid.pack()
-        submit_button = tk.Button(self.window, text="Submit", command=lambda : self.valid_userid()).pack()
-        back_button = tk.Button(self.window, text="Back", command=lambda : self.window.withdraw()).pack()
+        submit_button = tk.Button(newWindow, text="Submit", command=lambda : self.valid_userid(newWindow)).pack()
+        back_button = tk.Button(newWindow, text="Back", command=lambda : newWindow.destroy()).pack()
     
     # Check if input is valid for user id
-    def valid_userid(self):
+    def valid_userid(self, window):
         uid = self.uid.get()
         if uid.isnumeric() == False:
             tk.messagebox.showerror("Error","Invalid User ID (Must only contain numbers)")
         else:
             user = self.dataset.search_user(uid)
             if  user:
-                self.window.withdraw()
+                window.withdraw()
                 self.user = user
+                status = "Current User ID: ", self.user.get_id()
+                self.update_status(status)
                 self.show_menu()
             else:
                 tk.messagebox.showerror("Error", "User Not Found")
@@ -385,29 +401,29 @@ class App:
     
     # Method for input of info for new user
     def new_user(self):
-        self.window = Toplevel(self.window)
-        label = tk.Label(self.window, text="Please Enter the Following Info:")
+        newWindow = Toplevel(self.window)
+        label = tk.Label(newWindow, text="Please Enter the Following Info:")
         label.grid(row=0)
-        name_label = tk.Label(self.window, text="User Name:")
+        name_label = tk.Label(newWindow, text="User Name:")
         name_label.grid(row=1)
-        self.name_entry = tk.Entry(self.window)
+        self.name_entry = tk.Entry(newWindow)
         self.name_entry.grid(row=1, column=1)
-        age_label = tk.Label(self.window,text="User Age:")
+        age_label = tk.Label(newWindow,text="User Age:")
         age_label.grid(row=2)
-        self.age_entry = entry = tk.Entry(self.window)
+        self.age_entry = entry = tk.Entry(newWindow)
         self.age_entry.grid(row=2, column=1)
-        gen_label = tk.Label(self.window,text="Gender (M or F):")
+        gen_label = tk.Label(newWindow,text="Gender (M or F):")
         gen_label.grid(row=3)
-        self.gen_entry = tk.Entry(self.window)
+        self.gen_entry = tk.Entry(newWindow)
         self.gen_entry.grid(row=3, column=1)
-        submit_button = tk.Button(self.window, text="Submit", command=lambda : self.valid_new_user())
+        submit_button = tk.Button(newWindow, text="Submit", command=lambda : self.valid_new_user(newWindow))
         submit_button.grid(row=4)
-        back_button = tk.Button(self.window, text="Back to Login", command=lambda: self.window.withdraw())
+        back_button = tk.Button(newWindow, text="Back to Login", command=lambda: newWindow.destroy())
         back_button.grid(row=5)
         
     
     # Checking if the inputs for the new user is valid
-    def valid_new_user(self):
+    def valid_new_user(self, window):
         name = self.name_entry.get()
         age =  self.age_entry.get()
         gender = self.gen_entry.get()
@@ -426,27 +442,16 @@ class App:
         if len(err_msg) > 0:
             tk.messagebox.showerror("Error", err_msg)
         else:
-            self.window.withdraw()
+            window.withdraw()
+            self.user = self.dataset.add_user(name, age, gender)
+            status = "Current User ID: ", self.user.get_id()
+            self.update_status(status)
             self.show_menu()
-            self.dataset.add_user(name, age, gender)
+            
     
     
     # Window for the main menu with buttons corresponding to each option
-    def main_menu(self):
-        self.window.withdraw()
-        self.window = Toplevel(self.window)
-        label = tk.Label(self.window, text="Main Menu")
-        label.grid(row=0)
-        by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
-        by_rating.grid(row=1)
-        by_genre = tk.Button(self.window, text="Recommend Movie by Genre")
-        by_genre.grid(row=2)
-        chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
-        chg_user.grid(row=3)
-        quit = tk.Button(self.window,text="Quit", command=lambda : self.window.destroy())
-        quit.grid(row=4)
-
-
+    #def main_menu(self):
         #
         # Brad's code
         #
@@ -470,23 +475,24 @@ class App:
     
     # Method to display recommend by rating window
     def rec_rating_window(self):
-        self.window = Toplevel(self.window)
-        label = tk.Label(self.window, text="Recommend By Rating:")
+        newWindow = Toplevel(self.window)
+        label = tk.Label(newWindow, text="Recommend By Rating:")
         label.grid(row=0)
-        movie_label = tk.Label(self.window, text="Movie Title:")
+        movie_label = tk.Label(newWindow, text="Movie Title:")
         movie_label.grid(row=1)
-        self.movie_entry = tk.Entry(self.window)
+        self.movie_entry = tk.Entry(newWindow)
         self.movie_entry.grid(row=1, column=1)
-        submit_btn = tk.Button(self.window, text="Submit", command=lambda : self.input_movie())
+        submit_btn = tk.Button(newWindow, text="Submit", command=lambda : self.input_movie(newWindow))
         submit_btn.grid(row=3, column=1)
     
     
-    def input_movie(self):
+    def input_movie(self, window):
         movie = self.movie_entry.get()
         found_movie = self.dataset.search_movie_by_title(movie)
         if not found_movie:
             tk.messagebox.showerror("Error", "Movie Not Found")
         else:
+            window.withdraw()
             self.recommend_rating(found_movie)
         
         # while True:
@@ -531,30 +537,47 @@ class App:
         return
     
     def recommend_rating(self, movie):
-        while True:
-            count = self.dataset.count_user_rating(self.user.get_id())
-            print("user count =", count)
-            if count >= self.num_of_movie_need_rating:
-                print("user rating count is bigger than needed, here's the expected rating for your movie")
-                #self.dataset.recommend_rating(self.user.get_id(), movie.get_id())
-                self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id())
-                return
-            else:
-                print("user rating count is less than needed, please input your rating for the following movie")
-                # finds movies most watched by others
-                movies = self.dataset.find_most_watched_movies(
-                    self.user.get_id(),
-                    math.ceil((self.num_of_movie_need_rating - count) * 1.5))
-                print(movies)
-                # their average ratings?
-                self.dataset.print_ratings(movies["movie_id"])
-                # only allow ratings from app user
-                if not self.dataset.is_app_user(self.user.get_id()):
-                    print("not allowed to update rating for dataset users")
-                    break
-                if not self.input_ratings(movies):
-                    break
-        return
+        newWindow = Toplevel(self.window)
+        newWindow.geometry('500x500')
+        count = self.dataset.count_user_rating(self.user.get_id())
+        tk.Label(newWindow,text="user count = %d" %count).pack()
+        user_status = tk.Label(newWindow,text="")
+        if count >= self.num_of_movie_need_rating:
+            user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
+            user_status.pack()
+            rating = tk.Label(newWindow, text=self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id()))
+            rating.pack()
+        else:
+            user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
+            user_status.pack()
+            
+        close_btn = tk.Button(newWindow, text="Close", command=lambda : newWindow.destroy()).pack()
+        
+        
+        # while True:
+        #     count = self.dataset.count_user_rating(self.user.get_id())
+        #     print("user count =", count)
+        #     if count >= self.num_of_movie_need_rating:
+        #         print("user rating count is bigger than needed, here's the expected rating for your movie")
+        #         #self.dataset.recommend_rating(self.user.get_id(), movie.get_id())
+        #         self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id())
+        #         return
+        #     else:
+        #         print("user rating count is less than needed, please input your rating for the following movie")
+        #         # finds movies most watched by others
+        #         movies = self.dataset.find_most_watched_movies(
+        #             self.user.get_id(),
+        #             math.ceil((self.num_of_movie_need_rating - count) * 1.5))
+        #         print(movies)
+        #         # their average ratings?
+        #         self.dataset.print_ratings(movies["movie_id"])
+        #         # only allow ratings from app user
+        #         if not self.dataset.is_app_user(self.user.get_id()):
+        #             print("not allowed to update rating for dataset users")
+        #             break
+        #         if not self.input_ratings(movies):
+        #             break
+        # return
     
     def run(self):
         self.user = self.log_in()
