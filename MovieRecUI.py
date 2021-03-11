@@ -320,16 +320,14 @@ class App:
         self.new_button = tk.Button(self.window, text="New User", command=lambda : self.new_user())
         self.new_button.pack()
         self.by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
-        self.by_rating.pack()
         self.by_genre = tk.Button(self.window, text="Recommend Movie by Genre")
-        self.by_genre.pack()
         self.chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
-        self.chg_user.pack()
-        self.status_label = tk.Label(self.window, text="")
-        self.status_label.pack()
         self.quit_button = tk.Button(self.window, text="Quit", command=lambda : self.window.destroy())
         self.quit_button.pack()
-        self.hide_menu()
+        self.status_label = tk.Label(self.window)
+        self.user_count = tk.Label(self.window)
+        self.user_status = tk.Label(self.window)
+        self.ratings = tk.Label(self.window)
 
         #
         # Brad's code
@@ -350,12 +348,6 @@ class App:
         #             return user
         #         print("User id not found")
         # return None
-    
-    def hide_menu(self):
-        self.by_rating.pack_forget()
-        self.by_genre.pack_forget()
-        self.chg_user.pack_forget()
-        self.status_label.pack_forget()
         
         
     def show_menu(self):
@@ -368,6 +360,10 @@ class App:
         self.chg_user.pack()
         self.quit_button.pack()
         self.status_label.pack()
+
+    def clear_output(self):
+        self.user_count = tk.Label(self.window).pack_forget()
+        self.user_status = tk.Label(self.window).pack_forget()
     
     # Function to update the status label
     def update_status(self, status):
@@ -383,20 +379,26 @@ class App:
         back_button = tk.Button(newWindow, text="Back", command=lambda : newWindow.destroy()).pack()
     
     # Check if input is valid for user id
-    def valid_userid(self, window):
+    def valid_userid(self, newWindow):
         uid = self.uid.get()
+        error_label = tk.Label(newWindow)
         if uid.isnumeric() == False:
-            tk.messagebox.showerror("Error","Invalid User ID (Must only contain numbers)")
+            error_label.pack_forget()
+            error_label.config(text="Error: Invalid User ID \nMust Only Contain Numbers")
+            error_label.pack()
         else:
             user = self.dataset.search_user(uid)
             if  user:
-                window.withdraw()
+                newWindow.withdraw()
                 self.user = user
                 status = "Current User ID: ", self.user.get_id()
                 self.update_status(status)
                 self.show_menu()
             else:
-                tk.messagebox.showerror("Error", "User Not Found")
+                error_label.pack_forget()
+                error_label.config(text="Error: User Not Found")
+                error_label.pack()
+                
                 
     
     # Method for input of info for new user
@@ -423,7 +425,7 @@ class App:
         
     
     # Checking if the inputs for the new user is valid
-    def valid_new_user(self, window):
+    def valid_new_user(self, newWindow):
         name = self.name_entry.get()
         age =  self.age_entry.get()
         gender = self.gen_entry.get()
@@ -437,12 +439,14 @@ class App:
             err_msg += "- Invalid character in Age \n"
             
         if gender != "M" and gender != "F":
-            err_msg += "- Gender must be M or F \n"
+            err_msg += "- Gender must be M or F"
             
+        error_label = tk.Label(newWindow)
         if len(err_msg) > 0:
-            tk.messagebox.showerror("Error", err_msg)
+            error_label.config(text="Error: %s" %err_msg)
+            error_label.grid(row=6)
         else:
-            window.withdraw()
+            newWindow.withdraw()
             self.user = self.dataset.add_user(name, age, gender)
             status = "Current User ID: ", self.user.get_id()
             self.update_status(status)
@@ -484,15 +488,19 @@ class App:
         self.movie_entry.grid(row=1, column=1)
         submit_btn = tk.Button(newWindow, text="Submit", command=lambda : self.input_movie(newWindow))
         submit_btn.grid(row=3, column=1)
+        back_btn = tk.Button(newWindow, text="Back", command=lambda : newWindow.destroy())
+        back_btn.grid(row=4, column=1)
     
     
-    def input_movie(self, window):
+    def input_movie(self, newWindow):
         movie = self.movie_entry.get()
         found_movie = self.dataset.search_movie_by_title(movie)
+        error_label = tk.Label(newWindow)
         if not found_movie:
-            tk.messagebox.showerror("Error", "Movie Not Found")
+            error_label.config(text="Error: Movie Not Found")
+            error_label.grid(row=4)
         else:
-            window.withdraw()
+            newWindow.withdraw()
             self.recommend_rating(found_movie)
         
         # while True:
@@ -537,21 +545,24 @@ class App:
         return
     
     def recommend_rating(self, movie):
-        newWindow = Toplevel(self.window)
-        newWindow.geometry('500x500')
         count = self.dataset.count_user_rating(self.user.get_id())
-        tk.Label(newWindow,text="user count = %d" %count).pack()
-        user_status = tk.Label(newWindow,text="")
+        self.user_count.config(text="user count = %d" %count)
+        self.user_count.pack()
         if count >= self.num_of_movie_need_rating:
-            user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
-            user_status.pack()
-            rating = tk.Label(newWindow, text=self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id()))
-            rating.pack()
+            self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
+            self.user_status.pack()
+            self.ratings.config(text=self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id()))
+            self.rating.pack()
         else:
-            user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
-            user_status.pack()
-            
-        close_btn = tk.Button(newWindow, text="Close", command=lambda : newWindow.destroy()).pack()
+            self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
+            self.user_status.pack()
+            # # finds movies most watched by others
+            # movies = self.dataset.find_most_watched_movies(
+            #          self.user.get_id(),
+            #          math.ceil((self.num_of_movie_need_rating - count) * 1.5))
+            # tk.Label(newWindow,text=movies).pack()
+            # # their average ratings?
+            # self.dataset.print_ratings(movies["movie_id"])
         
         
         # while True:
@@ -601,7 +612,7 @@ class App:
         self.dataset.save()
 
 def main():
-    app = App(60)
+    app = App(5)
     app.run()
     tk.mainloop()
 

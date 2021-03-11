@@ -14,8 +14,8 @@
       <file leaf-file-name="MovieRecUI.py" pinned="false" current-in-tab="true">
         <entry file="file://$USER_HOME$/Desktop/MovieRecommender/MovieRecUI.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-15049">
-              <caret line="147" column="25" lean-forward="false" selection-start-line="147" selection-start-column="8" selection-end-line="147" selection-end-column="25" />
+            <state relative-caret-position="751">
+              <caret line="542" column="24" lean-forward="true" selection-start-line="542" selection-start-column="24" selection-end-line="542" selection-end-column="25" />
               <folding>
                 <element signature="e#19#39#0" expanded="true" />
               </folding>
@@ -179,8 +179,8 @@
     </entry>
     <entry file="file://$USER_HOME$/Desktop/MovieRecommender/MovieRecUI.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-15049">
-          <caret line="147" column="25" lean-forward="false" selection-start-line="147" selection-start-column="8" selection-end-line="147" selection-end-column="25" />
+        <state relative-caret-position="751">
+          <caret line="542" column="24" lean-forward="true" selection-start-line="542" selection-start-column="24" selection-end-line="542" selection-end-column="25" />
           <folding>
             <element signature="e#19#39#0" expanded="true" />
           </folding>
