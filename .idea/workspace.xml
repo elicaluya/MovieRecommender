@@ -14,8 +14,8 @@
       <file leaf-file-name="MovieRecUI.py" pinned="false" current-in-tab="true">
         <entry file="file://$USER_HOME$/Desktop/MovieRecommender/MovieRecUI.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1074">
-              <caret line="485" column="62" lean-forward="true" selection-start-line="485" selection-start-column="62" selection-end-line="485" selection-end-column="62" />
+            <state relative-caret-position="751">
+              <caret line="542" column="24" lean-forward="true" selection-start-line="542" selection-start-column="24" selection-end-line="542" selection-end-column="25" />
               <folding>
                 <element signature="e#19#39#0" expanded="true" />
               </folding>
@@ -36,9 +36,12 @@
     <findStrings>
       <find>dataset</find>
       <find>user_input</find>
-      <find>input</find>
       <find>input_movie</find>
       <find>self.user</find>
+      <find>rating_by_nmf</find>
+      <find>count_user_rating</find>
+      <find>search_user</find>
+      <find>input</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -50,10 +53,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-16" />
-    <option name="y" value="-16" />
-    <option name="width" value="3872" />
-    <option name="height" value="2092" />
+    <option name="x" value="1438" />
+    <option name="y" value="-36" />
+    <option name="width" value="968" />
+    <option name="height" value="533" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -176,8 +179,8 @@
     </entry>
     <entry file="file://$USER_HOME$/Desktop/MovieRecommender/MovieRecUI.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1074">
-          <caret line="485" column="62" lean-forward="true" selection-start-line="485" selection-start-column="62" selection-end-line="485" selection-end-column="62" />
+        <state relative-caret-position="751">
+          <caret line="542" column="24" lean-forward="true" selection-start-line="542" selection-start-column="24" selection-end-line="542" selection-end-column="25" />
           <folding>
             <element signature="e#19#39#0" expanded="true" />
           </folding>
