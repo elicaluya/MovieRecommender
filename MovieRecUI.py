@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
+import tkinter.scrolledtext as st
 import numpy as np
 import pandas as pd
 import math
@@ -158,7 +159,7 @@ class DataSet:
         return self.df_movie.loc[self.df_movie["movie_id"].isin(movies_not_rated.index)]
     
     def print_ratings(self, movie_ids):
-        print(self.df_data[self.df_data["item_id"].isin(movie_ids)].groupby("item_id").mean())
+        return self.df_data[self.df_data["item_id"].isin(movie_ids)].groupby("item_id").mean()
     
     def is_app_user(self, id):
         return (self.max_user_id < int(id))
@@ -306,7 +307,7 @@ class App:
         
         # Create GUI
         self.window = tk.Tk()
-        self.window.geometry('500x500')
+        self.window.geometry('700x700')
     
     def user_input(self, prompt):
         val = input(prompt)
@@ -318,16 +319,24 @@ class App:
         self.return_button = tk.Button(self.window, text="Returning User", command=lambda : self.return_user_window())
         self.return_button.pack()
         self.new_button = tk.Button(self.window, text="New User", command=lambda : self.new_user())
+        # Main Menu elements
         self.new_button.pack()
         self.by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
         self.by_genre = tk.Button(self.window, text="Recommend Movie by Genre")
         self.chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
         self.quit_button = tk.Button(self.window, text="Quit", command=lambda : self.window.destroy())
         self.quit_button.pack()
+        # Analysis elements
         self.status_label = tk.Label(self.window)
+        self.user_info = tk.Label(self.window)
         self.user_count = tk.Label(self.window)
         self.user_status = tk.Label(self.window)
         self.ratings = tk.Label(self.window)
+        self.movies_label = tk.Label(self.window, text="Movies:")
+        self.movies = st.ScrolledText(self.window, width=50, height=10,font=("Times New Roman", 10))
+        self.ratings_label = tk.Label(self.window, text="Ratings:")
+        self.ratings_scroll = st.ScrolledText(self.window, width=50, height=10,font=("Times New Roman", 10))
+        
 
         #
         # Brad's code
@@ -358,16 +367,18 @@ class App:
         self.by_genre.pack()
         self.chg_user.pack()
         self.chg_user.pack()
-        self.quit_button.pack()
         self.status_label.pack()
+        self.user_info.pack()
+        self.quit_button.pack()
 
     def clear_output(self):
         self.user_count = tk.Label(self.window).pack_forget()
         self.user_status = tk.Label(self.window).pack_forget()
     
     # Function to update the status label
-    def update_status(self, status):
+    def update_status(self, status, info):
         self.status_label.config(text=status)
+        self.user_info.config(text=info)
     
     # Method for input of user id of returning user
     def return_user_window(self):
@@ -391,8 +402,9 @@ class App:
             if  user:
                 newWindow.withdraw()
                 self.user = user
-                status = "Current User ID: ", self.user.get_id()
-                self.update_status(status)
+                status = "Current User ID: {}".format(self.user.get_id())
+                info = "Found User: {} {} {}".format(self.user.get_id(), self.user.get_age(), self.user.get_gender())
+                self.update_status(status, info)
                 self.show_menu()
             else:
                 error_label.pack_forget()
@@ -551,18 +563,30 @@ class App:
         if count >= self.num_of_movie_need_rating:
             self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
             self.user_status.pack()
-            self.ratings.config(text=self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id()))
-            self.rating.pack()
+            # self.ratings.config(text=self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id()))
+            # self.rating.pack()
         else:
             self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
             self.user_status.pack()
-            # # finds movies most watched by others
-            # movies = self.dataset.find_most_watched_movies(
-            #          self.user.get_id(),
-            #          math.ceil((self.num_of_movie_need_rating - count) * 1.5))
-            # tk.Label(newWindow,text=movies).pack()
-            # # their average ratings?
-            # self.dataset.print_ratings(movies["movie_id"])
+            # finds movies most watched by others
+            movies = self.dataset.find_most_watched_movies(
+                     self.user.get_id(),
+                     math.ceil((self.num_of_movie_need_rating - count) * 1.5))
+            for index, row in movies.iterrows():
+                movie_info = "{} | {} | {}\n".format(row["movie_id"], row["title"], row["release_date"])
+                self.movies.insert(tk.INSERT,  movie_info)
+            # their average ratings?
+            ratings = self.dataset.print_ratings(movies["movie_id"])
+            print(ratings)
+            for index, row in ratings.iterrows():
+                rating_info = "{}\n".format(row["rating"])
+                self.ratings_scroll.insert(tk.INSERT, rating_info)
+    
+            self.movies_label.pack()
+            self.movies.pack()
+            self.ratings_label.pack()
+            self.ratings_scroll.pack()
+
         
         
         # while True:
