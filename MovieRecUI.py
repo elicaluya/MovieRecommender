@@ -80,7 +80,7 @@ class DataSet:
         self.max_user_id = self.df_user["user_id"].max()
 
         # Reading data for testing the genre recommender method
-        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
+        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
         
         # read user data
         try:
@@ -744,9 +744,9 @@ def main():
     tk.mainloop()
 
     ###For testing genre based
-    df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
-    genre_test = Genre_Based("Toy Story (1995)", df_movie_genre)
-    genre_test.genre_recommender()
+    # df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
+    # genre_test = Genre_Based("Toy Story (1995)", df_movie_genre)
+    # genre_test.genre_recommender()
 
 if __name__ == "__main__":
     main()
