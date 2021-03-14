@@ -1,4 +1,4 @@
-import User
+from User import User
 import pandas as pd
 
 
@@ -10,6 +10,9 @@ class UserData:
             delimiter="|",
             names=['user_id', 'age', 'gender', 'occupation', 'zipcode'])
 
+    def get_max_id(self):
+        return self.df_user["user_id"].max()
+        
     def get_user(self, user_id):
         """Finds specific user in the user dataset by given id.
 
@@ -78,3 +81,7 @@ class AppUserData:
         self.df_app_user = self.df_app_user.append(new_row, ignore_index=True)
         self.max_app_user_id = new_user_id
         return User(new_user_id, name, age, gender)
+
+    def save(self):
+        """Store all the app user into app user files."""
+        self.df_app_user = self.df_app_user.to_csv("app_user.csv", index=False)

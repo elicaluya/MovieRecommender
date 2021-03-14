@@ -40,3 +40,20 @@ class UserService:
             return user
         # then search in user list
         return self.__search_user(user_id)
+
+    def create_new_user(self, name, age, gender):
+        """Create an app user by given parameters.
+
+        Args:
+            name: name string
+            age: age in positive integer
+            gender: M or F
+
+        Returns:
+            A User object containing attributes generated from given parameters.
+        """
+        return self.app_user_data.add_user(name, age, gender)
+
+    def save_app_users(self):
+        """Store all the app user into app user files."""
+        self.app_user_data.save()
