@@ -15,7 +15,7 @@ class MovieData:
                    'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western'])
 
         # Reading data for testing the genre recommender method
-        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
+        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
 
     def get_movies(self, movie_ids):
         """Gets a list of movies by given list of ids.
