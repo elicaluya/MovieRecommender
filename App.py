@@ -1,15 +1,15 @@
 #!/usr/bin/python
 
-import MovieRecSysBE_Service as bs
-import MovieRecSysBE_MovieService as ms
-import MovieRecSysBE_UserService as us
-import MovieRecSysBE_RecommendService as cs
-import MovieRecSysBE_RatingService as rs
-import MovieRecSysBE_MovieData as md
-import MovieRecSysBE_UserData as ud
-import MovieRecSysBE_RatingData as rd
-from MovieRecSysBE_Knn import Knn
-from MovieRecSysUI import UI
+import Service as bs
+import MovieService as ms
+import UserService as us
+import RecommendService as cs
+import RatingService as rs
+import MovieData as md
+import UserData as ud
+import RatingData as rd
+from Knn import Knn
+from UI import UI
 
 class App:
     def configure(
