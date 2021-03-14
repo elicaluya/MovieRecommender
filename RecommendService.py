@@ -1,12 +1,13 @@
 import numpy as np
 
 class RecommendService:
-    def __init__(self, rating_data, movie_data, user_data, app_user_data, knn):
+    def __init__(self, rating_data, movie_data, user_data, app_user_data, knn, genre):
         self.rating_data = rating_data
         self.movie_data = movie_data
         self.user_data = user_data
         self.app_user_data = app_user_data
         self.knn = knn
+        self.genre = genre
 
     def recommend_rating(self, user_id, movie_id):
         """Estimates rating for given user and movie.
@@ -35,3 +36,19 @@ class RecommendService:
             total += score * rating
             total_score += score
         print("expected rating ===>", total / total_score)
+
+    def recommend_movie_by_genre(self, movie_title, n_recommended_movie):
+        """Recommends movies by given movie genres.
+
+        Args:
+            movie_title: movie title (full length)
+            n_recommended_movie: number of recommended movie
+
+        Returns:
+            List of recommended movies.
+        """
+        df = self.movie_data.get_genre_dataset()
+        self.genre.fit(df)
+        movies = self.genre.predict(movie_title, n_recommended_movie)
+        print("recommended movies by genre:\n", movies)
+        return movies

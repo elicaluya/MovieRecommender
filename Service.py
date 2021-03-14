@@ -87,6 +87,18 @@ class RecommendService:
             none. it prints out estimation as of now.
         """
         return self.recommend_service.recommend_rating(user_id, movie_id)
+    
+    def recommend_movie_by_genre(self, movie_title, n_recommended_movie):
+        """Recommends movies by given movie genres.
+
+        Args:
+            movie_title: movie title (full length)
+            n_recommended_movie: number of recommended movie
+
+        Returns:
+            List of recommended movies.
+        """
+        return self.recommend_service.recommend_movie_by_genre(movie_title, n_recommended_movie)
 
 
 class UserService:

@@ -9,6 +9,7 @@ import MovieData as md
 import UserData as ud
 import RatingData as rd
 from Knn import Knn
+from Genre import Genre
 from UI import UI
 
 class App:
@@ -21,6 +22,7 @@ class App:
 
         # configure backend objects
         knn = Knn(knn_sim_metric, knn_n_neighbor)
+        genre = Genre()
 
         movie_data = md.MovieData()
         user_data = ud.UserData()
@@ -29,7 +31,7 @@ class App:
 
         user_service = us.UserService(user_data, app_user_data)
         movie_service = ms.MovieService(movie_data, user_service, rating_data)
-        recommend_service = cs.RecommendService(rating_data, movie_data, user_data, app_user_data, knn)
+        recommend_service = cs.RecommendService(rating_data, movie_data, user_data, app_user_data, knn, genre)
         rating_service = rs.RatingService(rating_data, movie_data, user_data, app_user_data)
 
         self.bs_movie = bs.MovieService(movie_service)

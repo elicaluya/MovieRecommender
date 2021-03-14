@@ -14,6 +14,9 @@ class MovieData:
                    'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery',
                    'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western'])
 
+        # Reading data for testing the genre recommender method
+        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
+
     def get_movies(self, movie_ids):
         """Gets a list of movies by given list of ids.
 
@@ -41,3 +44,6 @@ class MovieData:
             return None
         row = found_df.iloc[0]
         return Movie(row["movie_id"], row["title"], "unknown")
+
+    def get_genre_dataset(self):
+        return self.df_movie_genre
