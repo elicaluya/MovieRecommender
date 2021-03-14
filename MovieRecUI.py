@@ -56,8 +56,6 @@ class User:
 #
 class DataSet:
     def __init__(self):
-        """Loads dataset and user data files."""
-
         self.df_user = pd.read_csv(
             "movielens/Movielens-02/u.user",
             delimiter="|",
@@ -80,7 +78,7 @@ class DataSet:
         self.max_user_id = self.df_user["user_id"].max()
 
         # Reading data for testing the genre recommender method
-        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
+        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
         
         # read user data
         try:
@@ -101,14 +99,6 @@ class DataSet:
                 columns=['user_id', 'item_id', 'rating', 'timestamp'])
     
     def _search_app_user(self, id):
-        """Finds specific user in the app user dataset by given id.
-
-        Args:
-            id: user id (not index of the table)
-
-        Returns:
-            A User object containing attributes from the app user dataset.
-        """
         if self.df_app_user.empty:
             return None
         found_df = self.df_app_user.loc[self.df_app_user["user_id"] == int(id)]
@@ -119,14 +109,6 @@ class DataSet:
         return User(id, row["name"], row["age"], row["gender"])
     
     def _search_user(self, id):
-        """Finds specific user in the user dataset by given id.
-
-        Args:
-            id: user id (not index of the table)
-
-        Returns:
-            A User object containing attributes from the user dataset.
-        """
         found_df = self.df_user.loc[self.df_user["user_id"] == int(id)]
         if found_df.empty:
             return None
@@ -136,15 +118,7 @@ class DataSet:
         return User(id, "", row["age"], row["gender"])
     
     def search_user(self, id):
-        """Finds specific user in both user dataset (movielens and app) by given id.
-        It delegates actual searching down to two relevant search functions.
-
-        Args:
-            id: user id (not index of the table), this is unique in both dataseet.
-
-        Returns:
-            A User object containing attributes from the either user dataset.
-        """
+        # search in app user list
         user = self._search_app_user(id)
         if user:
             return user
@@ -152,14 +126,6 @@ class DataSet:
         return self._search_user(id)
     
     def search_movie_by_title(self, title):
-        """Finds specific movie in the movie dataset by given title.
-
-        Args:
-            title: movie title (must be exact match as of now)
-
-        Returns:
-            A Movie object containing attributes from the movie dataset.
-        """
         if self.df_movie.empty:
             return None
         found_df = self.df_movie.loc[self.df_movie["title"] == title]
@@ -169,23 +135,11 @@ class DataSet:
         return Movie(row["movie_id"], row["title"], "unknown")
     
     def save(self):
-        """Store created app user and all the ratings associated with them 
-        into app user/data files."""
         # save all regardless they were updated or not (user, rating)
         self.df_app_user = self.df_app_user.to_csv("app_user.csv", index=False)
         self.df_app_data = self.df_app_data.to_csv("app_data.csv", index=False)
     
     def add_user(self, name, age, gender):
-        """Create an app user by given parameters.
-
-        Args:
-            name: name string
-            age: age in positive integer
-            gender: M or F
-
-        Returns:
-            A User object containing attributes generated from given parameters.
-        """
         new_user_id = max(self.max_user_id, self.max_app_user_id) + 1
         new_row = {'user_id': new_user_id, 'name': name, 'age': age, 'gender': gender}
         self.df_app_user = self.df_app_user.append(new_row, ignore_index=True)
@@ -193,30 +147,11 @@ class DataSet:
         return User(new_user_id, name, age, gender)
     
     def count_user_rating(self, user_id):
-        """Counts number of ratings by given user excluding any 'not-watched' ratings.
-        For the app user, NaN value as rating indicates the user hasn't watched the movie
-        and opt to skip being prompted for rating feedback for that movie.
-
-        Args:
-            user_id: user id (not index of the table)
-
-        Returns:
-            Numeric counts indicating how many valid ratings are associated with the user.
-        """
         found_ratings = self.df_app_data["user_id"].loc[
             (self.df_app_data["user_id"] == int(user_id)) & (self.df_app_data["rating"].isna() == False)]
         return found_ratings.shape[0]
     
     def find_most_watched_movies(self, id, count):
-        """Finds most watched(rated) movies of specified counts and not rated by the given user.
-
-        Args:
-            id: user id (not index of the table)
-            count: number of movies to get
-
-        Returns:
-            A dataframe of movies list.
-        """
         zero_ratings = self.df_ratmat.apply(pd.Series.value_counts).iloc[0, 1:]
         ids_rated = self.df_app_data.loc[self.df_app_data["user_id"] == int(id)]["item_id"]
         movies_not_rated = zero_ratings[
@@ -227,34 +162,14 @@ class DataSet:
         return self.df_data[self.df_data["item_id"].isin(movie_ids)].groupby("item_id").mean()
     
     def is_app_user(self, id):
-        """Checks app user or not by id.
-
-        Args:
-            id: user id (not index of the table)
-
-        Returns:
-            A boolean tells it's app user or not.
-        """
         return (self.max_user_id < int(id))
     
     def add_user_rating(self, user_id, movie_id, rating):
-        """Adds a rating input from user into app dataset.
-
-        Args:
-            user_id: user id (not index of the table)
-            movie_id: movie id (not index of the table)
-            rating: rating (0 - 5)
-        """
         print("adding user rating : ", user_id, movie_id, rating)
         new_row = {'user_id': int(user_id), 'item_id': int(movie_id), 'rating': rating}
         self.df_app_data = self.df_app_data.append(new_row, ignore_index=True)
     
     def print_ratings_by_user(self, user_id):
-        """Debug prints out ratings associated with a user.
-
-        Args:
-            user_id: user id (not index of the table)
-        """
         movies = []
         ratings = self.df_ratmat.iloc[user_id]
         for i, rating in enumerate(ratings):
@@ -263,15 +178,6 @@ class DataSet:
                 # print(movies)
     
     def recommend_rating(self, user_id, movie_id):
-        """Estimates rating for given user and movie.
-
-        Args:
-            user_id: user id (not index of the table)
-            movie_id: movie id (not index of the table)
-
-        Returns:
-            none. it prints out estimation as of now.
-        """
         user_w_movie = self.df_ratmat[self.df_ratmat.iloc[:, movie_id - 1] > 0]
         n_users = min(10, user_w_movie.shape[0])
         if n_users < 1:
@@ -304,15 +210,6 @@ class DataSet:
         print("expected rating ===>", total / total_score)
     
     def rating_by_nmf(self, user_id, movie_id):
-        """Estimates rating for given user and movie by using NMF.
-
-        Args:
-            user_id: user id (not index of the table)
-            movie_id: movie id (not index of the table)
-
-        Returns:
-            none. it prints out estimation as of now.
-        """
         user_w_movie = self.df_ratmat[self.df_ratmat.iloc[:,movie_id - 1] > 0]
         n_users = min(10, user_w_movie.shape[0])
         if n_users < 1:
@@ -375,9 +272,9 @@ class Genre_Based:
     def tfidf_prep(self):
         tfidf_movies_genres = TfidfVectorizer(token_pattern = '[a-zA-Z0-9\-]+')
         #replacing empty values
-        self.dataset['genre'] = self.dataset['genre'].replace(to_replace="(no genres listed)", value="")
+        self.dataset['genres'] = self.dataset['genres'].replace(to_replace="(no genres listed)", value="")
         #creating the tfidf matrix
-        tfidf_movies_genres_matrix = tfidf_movies_genres.fit_transform(self.dataset['genre'])
+        tfidf_movies_genres_matrix = tfidf_movies_genres.fit_transform(self.dataset['genres'])
         #computing the cosine similarity
         cosine_sim_movies = linear_kernel(tfidf_movies_genres_matrix, tfidf_movies_genres_matrix)
         return cosine_sim_movies
@@ -387,7 +284,7 @@ class Genre_Based:
         #computing the cosine similarity and storing locally
         cosine_sim_movies = self.tfidf_prep()
         #variable to store index of movie that the user has specified
-        movie_index = self.dataset.loc[self.dataset['movie title'].isin([self.movie_title])]
+        movie_index = self.dataset.loc[self.dataset['title'].isin([self.movie_title])]
         movie_index = movie_index.index
         #computing the similarity score and then sorting based on the score
         movies_sim_scores = list(enumerate(cosine_sim_movies[movie_index][0]))
@@ -397,7 +294,7 @@ class Genre_Based:
         movie_indices = [i[0] for i in movies_sim_scores]
 
         #outputting results sorted by ratings
-        return print(self.dataset[['movie title','genre','rating']].iloc[movie_indices].sort_values('rating', ascending=False))
+        return print(self.dataset[['title','genres','rating']].iloc[movie_indices].sort_values('rating', ascending=False))
     
 
 #
@@ -744,7 +641,7 @@ def main():
     tk.mainloop()
 
     ###For testing genre based
-    # df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
+    # df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
     # genre_test = Genre_Based("Toy Story (1995)", df_movie_genre)
     # genre_test.genre_recommender()
 
