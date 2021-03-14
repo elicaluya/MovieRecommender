@@ -666,8 +666,8 @@ class App:
         if count >= self.num_of_movie_need_rating:
             self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
             self.user_status.pack()
-            # self.ratings.config(text=self.dataset.rating_by_nmf(self.user.get_id(), movie.get_id()))
-            # self.rating.pack()
+            self.ratings.config(text=self.dataset.recommend_rating(self.user.get_id(), movie.get_id()))
+            self.rating.pack()
         else:
             self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
             self.user_status.pack()
