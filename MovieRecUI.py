@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 import tkinter.scrolledtext as st
 import numpy as np
 import pandas as pd
@@ -78,7 +79,7 @@ class DataSet:
         self.max_user_id = self.df_user["user_id"].max()
 
         # Reading data for testing the genre recommender method
-        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
+        # self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movie_genre.csv")
         
         # read user data
         try:
@@ -194,7 +195,7 @@ class DataSet:
             new_row[str(int(r['item_id']))] = int(r['rating'])
         df = df.append(new_row, ignore_index=True)
         df = df.fillna(0)
-        print(df)
+        # print(df)
         nbrs = knn.neighbor(df, n_users)
         total = 0.0
         total_score = 0.0
@@ -203,11 +204,11 @@ class DataSet:
             score = 1.0 - nbrs[0][0][i]  # 1 - distance
             rating = user_w_movie.iloc[index][movie_id - 1]
             user_id = user_w_movie.iloc[index].name
-            print(i, "index:", index, "user_id:", user_id, "rating:", rating, "score:", score)
+            # print(i, "index:", index, "user_id:", user_id, "rating:", rating, "score:", score)
             self.print_ratings_by_user(user_id)
             total += score * rating
             total_score += score
-        print("expected rating ===>", total / total_score)
+        return "expected rating ===> {}".format(total / total_score)
     
     def rating_by_nmf(self, user_id, movie_id):
         user_w_movie = self.df_ratmat[self.df_ratmat.iloc[:,movie_id - 1] > 0]
@@ -271,11 +272,11 @@ class Genre_Based:
         #vectorizer to be used when creating the tfidf matrix
     def tfidf_prep(self):
         tfidf_movies_genres = TfidfVectorizer(token_pattern = '[a-zA-Z0-9\-]+')
-<<<<<<< HEAD
+# <<<<<<< HEAD
         #replacing empty values
         self.dataset['genres'] = self.dataset['genres'].replace(to_replace="(no genres listed)", value="")
-=======
->>>>>>> 9b4617f5d6204d3d782bf56cdf394d6a456fc5ba
+# =======
+# >>>>>>> 9b4617f5d6204d3d782bf56cdf394d6a456fc5ba
         #creating the tfidf matrix
         tfidf_movies_genres_matrix = tfidf_movies_genres.fit_transform(self.dataset['genres'])
         #computing the cosine similarity
@@ -335,10 +336,9 @@ class App:
         self.user_count = tk.Label(self.window)
         self.user_status = tk.Label(self.window)
         self.ratings = tk.Label(self.window)
-        self.movies_label = tk.Label(self.window, text="Movies:")
+        self.movies_label = tk.Label(self.window, text="Movies and Average Ratings:")
         self.movies = st.ScrolledText(self.window, width=50, height=10,font=("Times New Roman", 10))
-        self.ratings_label = tk.Label(self.window, text="Ratings:")
-        self.ratings_scroll = st.ScrolledText(self.window, width=50, height=10,font=("Times New Roman", 10))
+
         
 
         #
@@ -375,8 +375,14 @@ class App:
         self.quit_button.pack()
 
     def clear_output(self):
-        self.user_count = tk.Label(self.window).pack_forget()
-        self.user_status = tk.Label(self.window).pack_forget()
+        self.status_label.pack_forget()
+        self.user_info.pack_forget()
+        self.user_count.pack_forget()
+        self.user_status.pack_forget()
+        self.ratings.pack_forget()
+        self.movies_label.pack_forget()
+        self.movies.pack_forget()
+
     
     # Function to update the status label
     def update_status(self, status, info):
@@ -408,6 +414,7 @@ class App:
                 status = "Current User ID: {}".format(self.user.get_id())
                 info = "Found User: {} {} {}".format(self.user.get_id(), self.user.get_age(), self.user.get_gender())
                 self.update_status(status, info)
+                self.clear_output()
                 self.show_menu()
             else:
                 error_label.pack_forget()
@@ -463,8 +470,10 @@ class App:
         else:
             newWindow.withdraw()
             self.user = self.dataset.add_user(name, age, gender)
-            status = "Current User ID: ", self.user.get_id()
-            self.update_status(status)
+            status = "Current User ID: {}".format(self.user.get_id())
+            info = "Created New User: {} {} {}".format(self.user.get_id(), self.user.get_age(), self.user.get_gender()) 
+            self.update_status(status, info)
+            self.clear_output()
             self.show_menu()
             
     
@@ -537,15 +546,43 @@ class App:
         return
     
     def input_ratings(self, movies):
-        # take rating information from user
+        newWindow = Toplevel(self.window)
+        newWindow.geometry('400x400')
+        tk.Label(newWindow, text="Please Input ratings for the following movies:").pack()
         ratings = []
         for i, movie in movies.iterrows():
-            rating = self.user_input("[%s] --- %s : " % (i, movie["title"]))
-            if rating == 'q':
-                return None
-            ratings.append(rating)
-        # now save valid ratings
-        for i, rate in enumerate(ratings):
+            ttk.Label(newWindow, text=movie["title"]).pack()
+            n = tk.StringVar()
+            rating_input = ttk.Combobox(newWindow,textvariable=n)
+            rating_input['values'] = ('0','1','2','3','4','5')
+            rating_input.pack()
+            ratings.append(rating_input)
+
+        tk.Button(newWindow, text="Submit", command=lambda : self.submitRatings(movies, ratings, newWindow)).pack()
+        tk.Button(newWindow, text="Close", command=lambda : newWindow.destroy()).pack()
+        
+
+        # # take rating information from user
+        # ratings = []
+        # for i, movie in movies.iterrows():
+        #     rating = self.user_input("[%s] --- %s : " % (i, movie["title"]))
+        #     if rating == 'q':
+        #         return None
+        #     ratings.append(rating)
+        # # now save valid ratings
+        # for i, rate in enumerate(ratings):
+        #     if rate.isnumeric():
+        #         r = int(rate)
+        #         # zero is valid rating too
+        #     else:
+        #         # empty means didn't watch, record as NaN
+        #         r = np.nan
+        #     self.dataset.add_user_rating(self.user.get_id(), int(movies["movie_id"].iloc[i]), r)
+        # return True
+    
+    def submitRatings(self, movies, ratings, newWindow):
+        for i in range(len(ratings)):
+            rate = ratings[i].get()
             if rate.isnumeric():
                 r = int(rate)
                 # zero is valid rating too
@@ -553,42 +590,53 @@ class App:
                 # empty means didn't watch, record as NaN
                 r = np.nan
             self.dataset.add_user_rating(self.user.get_id(), int(movies["movie_id"].iloc[i]), r)
-        return True
-    
-    def change_user(self):
-        # not supported yet
-        return
+        newWindow.destroy()
+
     
     def recommend_rating(self, movie):
         count = self.dataset.count_user_rating(self.user.get_id())
         self.user_count.config(text="user count = %d" %count)
         self.user_count.pack()
+
         if count >= self.num_of_movie_need_rating:
-            self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
+            self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie: {}".format(movie.get_title()))
             self.user_status.pack()
             self.ratings.config(text=self.dataset.recommend_rating(self.user.get_id(), movie.get_id()))
-            self.rating.pack()
+            self.ratings.pack()
         else:
-            self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
+            self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie: {}".format(movie.get_title()))
             self.user_status.pack()
+            movie_ratings = []
+            self.movies.config(state=tk.NORMAL)
+            self.movies.delete('1.0', END)
             # finds movies most watched by others
             movies = self.dataset.find_most_watched_movies(
                      self.user.get_id(),
                      math.ceil((self.num_of_movie_need_rating - count) * 1.5))
             for index, row in movies.iterrows():
-                movie_info = "{} | {} | {}\n".format(row["movie_id"], row["title"], row["release_date"])
-                self.movies.insert(tk.INSERT,  movie_info)
+                movie_info = "{} | {} | {} => ".format(row["movie_id"], row["title"], row["release_date"])
+                movie_ratings.append(movie_info)
+                
             # their average ratings?
             ratings = self.dataset.print_ratings(movies["movie_id"])
-            print(ratings)
+            
+            mv_index = 0
             for index, row in ratings.iterrows():
-                rating_info = "{}\n".format(row["rating"])
-                self.ratings_scroll.insert(tk.INSERT, rating_info)
-    
+                rating_info = "{}\n\n".format(row["rating"])
+                movie_ratings[mv_index] += rating_info
+        
+                self.movies.insert(tk.INSERT, movie_ratings[mv_index])
+                mv_index += 1
+
+            self.movies.config(state=tk.DISABLED)
             self.movies_label.pack()
             self.movies.pack()
-            self.ratings_label.pack()
-            self.ratings_scroll.pack()
+
+            if not self.dataset.is_app_user(self.user.get_id()):
+                print("not allowed to update rating for dataset users")
+                return
+
+            self.input_ratings(movies)            
 
         
         
