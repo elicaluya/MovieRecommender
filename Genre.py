@@ -12,14 +12,14 @@ class Genre:
     def fit(self, dataset):
         self.dataset = dataset
         #creating the tfidf matrix
-        tfidf_movies_genres_matrix = self.tfidf_movies_genres.fit_transform(self.dataset['genres'])
+        tfidf_movies_genres_matrix = self.tfidf_movies_genres.fit_transform(self.dataset['genre'])
         #computing the cosine similarity
         self.cosine_sim_movies = linear_kernel(tfidf_movies_genres_matrix, tfidf_movies_genres_matrix)
 
-    def genre_recommender(self, movie_title, K=10):
+    def predict(self, movie_title, K=10):
         self.movie_title = movie_title
         #variable to store index of movie that the user has specified
-        movie_index = self.dataset.loc[self.dataset['title'].isin([self.movie_title])]
+        movie_index = self.dataset.loc[self.dataset['movie title'].isin([self.movie_title])]
         movie_index = movie_index.index
         #computing the similarity score and then sorting based on the score
         movies_sim_scores = list(enumerate(self.cosine_sim_movies[movie_index][0]))
@@ -29,4 +29,4 @@ class Genre:
         movie_indices = [i[0] for i in movies_sim_scores]
 
         #outputting results sorted by ratings
-        return self.dataset[['title','genres','rating']].iloc[movie_indices].sort_values('rating', ascending=False)
+        return self.dataset[['movie title','genre','rating']].iloc[movie_indices].sort_values('rating', ascending=False)

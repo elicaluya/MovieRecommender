@@ -37,7 +37,7 @@ class RatingService:
             rating: rating (0 - 5)
         """
         print("adding user rating : ", user_id, movie_id, rating)
-        self.rating_data(user_id, movie_id, rating)
+        self.rating_data.add_user_rating(user_id, movie_id, rating)
 
     def get_average_ratings_of_movies(self, movie_ids):
         """Calculates a mean ratings for given movies.
