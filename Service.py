@@ -76,17 +76,18 @@ class RecommendService:
     def __init__(self, recommend_service):
         self.recommend_service = recommend_service
 
-    def recommend_rating(self, user_id, movie_id):
+    def recommend_rating(self, user_id, movie_id, n_neighbor):
         """Estimates rating for given user and movie.
 
         Args:
             user_id: user id (not index of the table)
             movie_id: movie id (not index of the table)
+            n_neighbor: number of K value for Knn
 
         Returns:
             none. it prints out estimation as of now.
         """
-        return self.recommend_service.recommend_rating(user_id, movie_id)
+        return self.recommend_service.recommend_rating(user_id, movie_id, n_neighbor)
     
     def recommend_movie_by_genre(self, movie_title, n_recommended_movie):
         """Recommends movies by given movie genres.

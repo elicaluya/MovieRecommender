@@ -16,9 +16,10 @@ from sklearn.metrics.pairwise import linear_kernel
 # Main GUI class where App is run
 #
 class UI:
-    def __init__(self, num_of_movie_need_rating):
+    def __init__(self, app, num_of_movie_need_rating):
         self.num_of_movie_need_rating = num_of_movie_need_rating
-        
+        self.app_ref = app
+
         # Create GUI
         self.window = tk.Tk()
         self.window.geometry('700x700')
@@ -224,7 +225,7 @@ class UI:
         if count >= self.num_of_movie_need_rating:
             self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
             self.user_status.pack()
-            self.ratings.config(text=self.bs_recommend.recommend_rating(self.user.get_id(), movie.get_id()))
+            self.ratings.config(text=self.bs_recommend.recommend_rating(self.user.get_id(), movie.get_id(), self.app_ref.knn_n_neighbor))
         else:
             self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
             self.user_status.pack()

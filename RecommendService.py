@@ -9,12 +9,13 @@ class RecommendService:
         self.knn = knn
         self.genre = genre
 
-    def recommend_rating(self, user_id, movie_id):
+    def recommend_rating(self, user_id, movie_id, n_neighbor):
         """Estimates rating for given user and movie.
 
         Args:
             user_id: user id (not index of the table)
             movie_id: movie id (not index of the table)
+            n_neighbor: number of K value for Knn
 
         Returns:
             none. it prints out estimation as of now.
@@ -22,7 +23,7 @@ class RecommendService:
         user_w_movie = self.rating_data.get_user_ratings_by_movie(movie_id)
         df = self.rating_data.get_user_vector(user_id)
         print(df)
-        self.knn.fit(np.mat(user_w_movie))
+        self.knn.fit(np.mat(user_w_movie), n_neighbor)
         nbrs = self.knn.predict(df)
         total = 0.0
         total_score = 0.0

@@ -16,12 +16,13 @@ class App:
     def configure(
         self, 
         num_of_movie_need_rating=60,
-        knn_sim_metric="pearson",
+        knn_sim_metric="correlation",
         knn_n_neighbor=10):
         self.num_of_movie_need_rating = num_of_movie_need_rating
 
         # configure backend objects
-        knn = Knn(knn_sim_metric, knn_n_neighbor)
+        self.knn_n_neighbor = knn_n_neighbor
+        knn = Knn(knn_sim_metric)
         genre = Genre()
 
         movie_data = md.MovieData()
@@ -40,7 +41,7 @@ class App:
         self.bs_rating = bs.RatingService(rating_service)
 
         # configure frontend UI object
-        self.fe = UI(num_of_movie_need_rating)
+        self.fe = UI(self, num_of_movie_need_rating)
         self.fe.configure(self.bs_movie, self.bs_user, self.bs_recommend, self.bs_rating)
     
     def run(self):
