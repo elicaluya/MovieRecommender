@@ -85,7 +85,7 @@ class RecommendService:
             n_neighbor: number of K value for Knn
 
         Returns:
-            none. it prints out estimation as of now.
+            Weight averaged rating.
         """
         return self.recommend_service.recommend_rating(user_id, movie_id, n_neighbor)
     

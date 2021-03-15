@@ -18,7 +18,7 @@ class RecommendService:
             n_neighbor: number of K value for Knn
 
         Returns:
-            none. it prints out estimation as of now.
+            Weight averaged rating.
         """
         user_w_movie = self.rating_data.get_user_ratings_by_movie(movie_id)
         df = self.rating_data.get_user_vector(user_id)
@@ -36,7 +36,9 @@ class RecommendService:
             #self.print_ratings_by_user(user_id)
             total += score * rating
             total_score += score
-        print("expected rating ===>", total / total_score)
+        avg_rating = total / total_score
+        print("expected rating ===>", avg_rating)
+        return avg_rating
 
     def recommend_movie_by_genre(self, movie_title, n_recommended_movie):
         """Recommends movies by given movie genres.
