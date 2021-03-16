@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 class RatingData:
@@ -48,9 +49,9 @@ class RatingData:
         Returns:
             A data frame representing user rating vector
         """
-        if user_id < len(self.df_ratmat):
+        if user_id in self.df_ratmat.index:
             # user from dataset
-            return self.df_ratmat[user_id]
+            return np.array([self.df_ratmat.loc[user_id]])
         movies_rated = self.get_valid_user_ratings(user_id)
         movie_size = self.df_ratmat.shape[1]
         cols = [str(i) for i in range(1, movie_size + 1)]

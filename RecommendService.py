@@ -1,5 +1,6 @@
 import numpy as np
 
+_DEBUG = False
 class RecommendService:
     def __init__(self, rating_data, movie_data, user_data, app_user_data, knn, genre):
         self.rating_data = rating_data
@@ -21,8 +22,14 @@ class RecommendService:
             Weight averaged rating.
         """
         user_w_movie = self.rating_data.get_user_ratings_by_movie(movie_id)
+        if user_id in user_w_movie.index:
+            # remove same user data
+            user_w_movie = user_w_movie.drop([user_id])
+        if len(user_w_movie) <= 0:
+            # no user to compute rating estimation
+            return 0.0
         df = self.rating_data.get_user_vector(user_id)
-        print(df)
+        if _DEBUG: print(df)
         self.knn.fit(np.mat(user_w_movie), n_neighbor)
         nbrs = self.knn.predict(df)
         total = 0.0
@@ -32,12 +39,12 @@ class RecommendService:
             score = 1.0 - nbrs[0][0][i]  # 1 - distance
             rating = user_w_movie.iloc[index][movie_id - 1]
             user_id = user_w_movie.iloc[index].name
-            print(i, "index:", index, "user_id:", user_id, "rating:", rating, "score:", score)
+            if _DEBUG: print(i, "index:", index, "user_id:", user_id, "rating:", rating, "score:", score)
             #self.print_ratings_by_user(user_id)
             total += score * rating
             total_score += score
         avg_rating = total / total_score
-        print("expected rating ===>", avg_rating)
+        if _DEBUG: print("expected rating ===>", avg_rating)
         return avg_rating
 
     def recommend_movie_by_genre(self, movie_title, n_recommended_movie):
