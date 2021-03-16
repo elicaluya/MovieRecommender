@@ -4,7 +4,7 @@ import pandas as pd
 
 class MovieData:
     def __init__(self, df_movie = None, df_movie_genre = None):
-        if not df_movie:
+        if df_movie is None:
             self.df_movie = pd.read_csv(
                 "movielens/Movielens-02/u.item",
                 delimiter="|",
@@ -17,7 +17,7 @@ class MovieData:
         else:
             self.df_movie = df_movie
 
-        if not df_movie_genre:
+        if df_movie_genre is None:
             # Reading data for testing the genre recommender method
             self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
         else:

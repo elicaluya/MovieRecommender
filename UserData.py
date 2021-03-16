@@ -4,7 +4,7 @@ import pandas as pd
 
 class UserData:
     def __init__(self, df_user = None):
-        if not df_user:
+        if df_user is None:
             # loads user dataset files
             self.df_user = pd.read_csv(
                 "movielens/Movielens-02/u.user",
@@ -39,7 +39,7 @@ class UserData:
 class AppUserData:
     def __init__(self, user_data, df_app_user = None):
         self.user_data = user_data
-        if not df_app_user:
+        if df_app_user is None:
             # loads app user dataset files
             try:
                 self.df_app_user = pd.read_csv("app_user.csv")

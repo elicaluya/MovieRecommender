@@ -4,7 +4,7 @@ import numpy as np
 
 class RatingData:
     def __init__(self, df_data = None, df_ratmat = None, df_app_data = None):
-        if not df_data:
+        if df_data is None:
             self.df_data = pd.read_csv(
                 "movielens/Movielens-02/u.data",
                 delimiter="\t",
@@ -12,13 +12,13 @@ class RatingData:
         else:
             self.df_data = df_data
         
-        if not df_ratmat:
+        if df_ratmat is None:
             self.df_ratmat = pd.read_csv(
                 "movielens/Movielens-02/data_matrix.csv", index_col=0)
         else:
             self.df_ratmat = df_ratmat
 
-        if not df_app_data:
+        if df_app_data is None:
             # read user rating data
             try:
                 self.df_app_data = pd.read_csv("app_data.csv")
