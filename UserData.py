@@ -3,12 +3,15 @@ import pandas as pd
 
 
 class UserData:
-    def __init__(self):
-        # loads user dataset files
-        self.df_user = pd.read_csv(
-            "movielens/Movielens-02/u.user",
-            delimiter="|",
-            names=['user_id', 'age', 'gender', 'occupation', 'zipcode'])
+    def __init__(self, df_user = None):
+        if not df_user:
+            # loads user dataset files
+            self.df_user = pd.read_csv(
+                "movielens/Movielens-02/u.user",
+                delimiter="|",
+                names=['user_id', 'age', 'gender', 'occupation', 'zipcode'])
+        else:
+            self.df_user = df_user
 
     def get_max_id(self):
         return self.df_user["user_id"].max()
@@ -34,15 +37,18 @@ class UserData:
 
 
 class AppUserData:
-    def __init__(self, user_data):
+    def __init__(self, user_data, df_app_user = None):
         self.user_data = user_data
-        # loads app user dataset files
-        try:
-            self.df_app_user = pd.read_csv("app_user.csv")
-        except FileNotFoundError as e:
-            # start with empty set
-            self.df_app_user = pd.DataFrame(
-                columns=['user_id', 'name', 'age', 'gender'])
+        if not df_app_user:
+            # loads app user dataset files
+            try:
+                self.df_app_user = pd.read_csv("app_user.csv")
+            except FileNotFoundError as e:
+                # start with empty set
+                self.df_app_user = pd.DataFrame(
+                    columns=['user_id', 'name', 'age', 'gender'])
+        else:
+            self.df_app_user = df_app_user
 
         self.max_app_user_id = self.df_app_user["user_id"].max()
 

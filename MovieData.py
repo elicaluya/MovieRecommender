@@ -3,19 +3,25 @@ import pandas as pd
 
 
 class MovieData:
-    def __init__(self):
-        self.df_movie = pd.read_csv(
-            "movielens/Movielens-02/u.item",
-            delimiter="|",
-            encoding='latin-1',
-            names=['movie_id', 'title', 'release_date', 'video_release_date',
-                   'IMDb_URL', 'unknown', 'Action', 'Adventure', 'Animation',
-                   'Childrens', 'Comedy', 'Crime', 'Documentary', 'Drama',
-                   'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery',
-                   'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western'])
+    def __init__(self, df_movie = None, df_movie_genre = None):
+        if not df_movie:
+            self.df_movie = pd.read_csv(
+                "movielens/Movielens-02/u.item",
+                delimiter="|",
+                encoding='latin-1',
+                names=['movie_id', 'title', 'release_date', 'video_release_date',
+                    'IMDb_URL', 'unknown', 'Action', 'Adventure', 'Animation',
+                    'Childrens', 'Comedy', 'Crime', 'Documentary', 'Drama',
+                    'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery',
+                    'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western'])
+        else:
+            self.df_movie = df_movie
 
-        # Reading data for testing the genre recommender method
-        self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
+        if not df_movie_genre:
+            # Reading data for testing the genre recommender method
+            self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
+        else:
+            self.df_movie_genre = df_movie_genre
 
     def get_movies(self, movie_ids):
         """Gets a list of movies by given list of ids.

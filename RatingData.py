@@ -3,20 +3,31 @@ import numpy as np
 
 
 class RatingData:
-    def __init__(self):
-        self.df_data = pd.read_csv(
-            "movielens/Movielens-02/u.data",
-            delimiter="\t",
-            names=['user_id', 'item_id', 'rating', 'timestamp'])
-        self.df_ratmat = pd.read_csv(
-            "movielens/Movielens-02/data_matrix.csv", index_col=0)
-        # read user rating data
-        try:
-            self.df_app_data = pd.read_csv("app_data.csv")
-        except FileNotFoundError as e:
-            # start with empty set
-            self.df_app_data = pd.DataFrame(
-                columns=['user_id', 'item_id', 'rating', 'timestamp'])
+    def __init__(self, df_data = None, df_ratmat = None, df_app_data = None):
+        if not df_data:
+            self.df_data = pd.read_csv(
+                "movielens/Movielens-02/u.data",
+                delimiter="\t",
+                names=['user_id', 'item_id', 'rating', 'timestamp'])
+        else:
+            self.df_data = df_data
+        
+        if not df_ratmat:
+            self.df_ratmat = pd.read_csv(
+                "movielens/Movielens-02/data_matrix.csv", index_col=0)
+        else:
+            self.df_ratmat = df_ratmat
+
+        if not df_app_data:
+            # read user rating data
+            try:
+                self.df_app_data = pd.read_csv("app_data.csv")
+            except FileNotFoundError as e:
+                # start with empty set
+                self.df_app_data = pd.DataFrame(
+                    columns=['user_id', 'item_id', 'rating', 'timestamp'])
+        else:
+            self.df_app_data = df_app_data
 
     def get_valid_user_ratings(self, user_id):
         """Finds valid (> 0) ratings for given user.

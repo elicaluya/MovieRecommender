@@ -14,7 +14,7 @@ class Knn:
         self.K = K
         K = min(K, self.num_user)
         self.knn = NearestNeighbors(
-            metric=self.sim_metric, algorithm="brute", n_neighbors=K, n_jobs=1)
+            metric=self.sim_metric, algorithm="brute", n_neighbors=K, n_jobs=K)
         self.knn.fit(data_mat)
     
     def predict(self, movie_data):

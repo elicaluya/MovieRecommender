@@ -8,27 +8,29 @@ import RatingService as rs
 import MovieData as md
 import UserData as ud
 import RatingData as rd
-from Knn import Knn
-from Genre import Genre
-from UI import UI
+import Knn
+import Genre
+import UI
 
 class App:
     def configure(
-        self, 
-        num_of_movie_need_rating=60,
-        knn_sim_metric="correlation",
-        knn_n_neighbor=10):
+        self, num_of_movie_need_rating=60,
+        knn_sim_metric="correlation", knn_n_neighbor=10,
+        df_user=None, df_app_user=None,
+        df_data=None, df_ratmat=None, df_app_data=None,
+        df_movie=None,df_movie_genre=None):
+
         self.num_of_movie_need_rating = num_of_movie_need_rating
 
         # configure backend objects
         self.knn_n_neighbor = knn_n_neighbor
-        knn = Knn(knn_sim_metric)
-        genre = Genre()
+        knn = Knn.Knn(knn_sim_metric)
+        genre = Genre.Genre()
 
-        movie_data = md.MovieData()
-        user_data = ud.UserData()
-        app_user_data = ud.AppUserData(user_data)
-        rating_data = rd.RatingData()
+        movie_data = md.MovieData(df_movie=df_movie, df_movie_genre=df_movie_genre)
+        user_data = ud.UserData(df_user=df_user)
+        app_user_data = ud.AppUserData(user_data, df_app_user=df_app_user)
+        rating_data = rd.RatingData(df_data=df_data, df_ratmat=df_ratmat, df_app_data=df_app_data)
 
         user_service = us.UserService(user_data, app_user_data)
         movie_service = ms.MovieService(movie_data, user_service, rating_data)
@@ -41,7 +43,7 @@ class App:
         self.bs_rating = bs.RatingService(rating_service)
 
         # configure frontend UI object
-        self.fe = UI(self, num_of_movie_need_rating)
+        self.fe = UI.UI(self, num_of_movie_need_rating)
         self.fe.configure(self.bs_movie, self.bs_user, self.bs_recommend, self.bs_rating)
     
     def run(self):
