@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 import tkinter.scrolledtext as st
 import numpy as np
 import pandas as pd
@@ -55,8 +56,7 @@ class UI:
         self.ratings = tk.Label(self.window)
         self.movies_label = tk.Label(self.window, text="Movies:")
         self.movies = st.ScrolledText(self.window, width=50, height=10,font=("Times New Roman", 10))
-        self.ratings_label = tk.Label(self.window, text="Ratings:")
-        self.ratings_scroll = st.ScrolledText(self.window, width=50, height=10,font=("Times New Roman", 10))        
+      
         
     def show_menu(self):
         self.return_button.pack_forget()
@@ -71,8 +71,13 @@ class UI:
         self.quit_button.pack()
 
     def clear_output(self):
-        self.user_count = tk.Label(self.window).pack_forget()
-        self.user_status = tk.Label(self.window).pack_forget()
+        self.status_label.pack_forget()
+        self.user_info.pack_forget()
+        self.user_count.pack_forget()
+        self.user_status.pack_forget()
+        self.ratings.pack_forget()
+        self.movies_label.pack_forget()
+        self.movies.pack_forget()
     
     # Function to update the status label
     def update_status(self, status, info):
@@ -104,6 +109,7 @@ class UI:
                 status = "Current User ID: {}".format(self.user.get_id())
                 info = "Found User: {} {} {}".format(self.user.get_id(), self.user.get_age(), self.user.get_gender())
                 self.update_status(status, info)
+                self.clear_output()
                 self.show_menu()
             else:
                 error_label.pack_forget()
@@ -156,9 +162,10 @@ class UI:
         else:
             newWindow.withdraw()
             self.user = self.bs_user.create_new_user(name, age, gender)
-            status = "Current User ID: ", self.user.get_id()
+            status = "Current User ID: {}".format(self.user.get_id())
             info = "Created User: {} {} {} {}".format(self.user.get_id(), self.user.get_name(), self.user.get_age(), self.user.get_gender())
             self.update_status(status, info)
+            self.clear_output()
             self.show_menu()
     
     # Method to display recommend by rating window
@@ -196,14 +203,24 @@ class UI:
     
     def input_ratings(self, movies):
         # take rating information from user
+        newWindow = Toplevel(self.window)
+        newWindow.geometry('500x500')
+        tk.Label(newWindow, text="Please Input ratings for the following movies:").pack()
         ratings = []
         for i, movie in movies.iterrows():
-            rating = self.user_input("[%s] --- %s : " % (i, movie["title"]))
-            if rating == 'q':
-                return None
-            ratings.append(rating)
-        # now save valid ratings
-        for i, rate in enumerate(ratings):
+            ttk.Label(newWindow, text=movie["title"]).pack()
+            n = tk.StringVar()
+            rating_input = ttk.Combobox(newWindow,textvariable=n)
+            rating_input['values'] = ('0','1','2','3','4','5')
+            rating_input.pack()
+            ratings.append(rating_input)
+
+        tk.Button(newWindow, text="Submit", command=lambda : self.submitRatings(movies, ratings, newWindow)).pack()
+        tk.Button(newWindow, text="Close", command=lambda : newWindow.destroy()).pack()
+
+    def submitRatings(self, movies, ratings, newWindow):
+        for i in range(len(ratings)):
+            rate = ratings[i].get()
             if rate.isnumeric():
                 r = int(rate)
                 # zero is valid rating too
@@ -211,11 +228,8 @@ class UI:
                 # empty means didn't watch, record as NaN
                 r = np.nan
             self.bs_user.add_user_rating(self.user.get_id(), int(movies["movie_id"].iloc[i]), r)
-        return True
+        newWindow.destroy()
     
-    def change_user(self):
-        # not supported yet
-        return
     
     def recommend_rating(self, movie):
         found_ratings = self.bs_rating.get_valid_user_ratings(self.user.get_id())
@@ -223,31 +237,48 @@ class UI:
         self.user_count.config(text="user count = %d" %count)
         self.user_count.pack()
         if count >= self.num_of_movie_need_rating:
-            self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie")
+            self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie: {}".format(movie.get_title()))
             self.user_status.pack()
             self.ratings.config(text=self.bs_recommend.recommend_rating(self.user.get_id(), movie.get_id(), self.app_ref.knn_n_neighbor))
+            self.ratings.pack()
         else:
-            self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie")
+            self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie: {}".format(movie.get_title()))
             self.user_status.pack()
+            movie_ratings = []
+            self.movies.config(state=tk.NORMAL)
+            self.movies.delete('1.0', END)
             # finds movies most watched by others
             movies = self.bs_movie.get_most_watched_movie(
                      self.user.get_id(),
                      math.ceil((self.num_of_movie_need_rating - count) * 1.5))
             for index, row in movies.iterrows():
-                movie_info = "{} | {} | {}\n".format(row["movie_id"], row["title"], row["release_date"])
-                self.movies.insert(tk.INSERT,  movie_info)
+                movie_info = "{} | {} | {} => ".format(row["movie_id"], row["title"], row["release_date"])
+                movie_ratings.append(movie_info)
             # their average ratings?
             ratings = self.bs_rating.get_average_ratings_of_movies(movies["movie_id"])
-            print(ratings)
+            
+            mv_index = 0
             for index, row in ratings.iterrows():
-                rating_info = "{}\n".format(row["rating"])
-                self.ratings_scroll.insert(tk.INSERT, rating_info)
+                rating_info = "{}\n\n".format(row["rating"])
+                movie_ratings[mv_index] += rating_info
+        
+                self.movies.insert(tk.INSERT, movie_ratings[mv_index])
+                mv_index += 1
     
+            self.movies.config(state=tk.DISABLED)
             self.movies_label.pack()
             self.movies.pack()
-            self.ratings_label.pack()
-            self.ratings_scroll.pack()
-    
+
+            if self.user.get_id() <= 943:
+                print("not allowed to update rating for dataset users")
+                return 
+
+            # if not self.bs_rating.is_app_user(self.user.get_id()):
+            #     print("not allowed to update rating for dataset users")
+            #     return
+
+            self.input_ratings(movies) 
+
     def run(self):
         self.log_in()
         tk.mainloop()
