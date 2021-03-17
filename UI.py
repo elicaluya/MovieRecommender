@@ -205,18 +205,33 @@ class UI:
         # take rating information from user
         newWindow = Toplevel(self.window)
         newWindow.geometry('500x500')
-        tk.Label(newWindow, text="Please Input ratings for the following movies:").pack()
+        
+        canvas = tk.Canvas(newWindow)
+        scrollbar = Scrollbar(newWindow, orient=VERTICAL, command=canvas.yview)
+        frame = Frame(canvas)
+        
+        
+
+
+        tk.Label(frame, text="Please Input ratings for the following movies:").pack()
         ratings = []
         for i, movie in movies.iterrows():
-            ttk.Label(newWindow, text=movie["title"]).pack()
+            ttk.Label(frame, text=movie["title"]).pack()
             n = tk.StringVar()
-            rating_input = ttk.Combobox(newWindow,textvariable=n)
+            rating_input = ttk.Combobox(frame,textvariable=n)
             rating_input['values'] = ('0','1','2','3','4','5')
             rating_input.pack()
             ratings.append(rating_input)
 
-        tk.Button(newWindow, text="Submit", command=lambda : self.submitRatings(movies, ratings, newWindow)).pack()
-        tk.Button(newWindow, text="Close", command=lambda : newWindow.destroy()).pack()
+        tk.Button(frame, text="Submit", command=lambda : self.submitRatings(movies, ratings, newWindow)).pack()
+        tk.Button(frame, text="Close", command=lambda : newWindow.destroy()).pack()
+
+        canvas.create_window(0,0,anchor='nw',window=frame)
+        canvas.update_idletasks()
+        canvas.configure(scrollregion=canvas.bbox('all'),yscrollcommand=scrollbar.set)
+        canvas.pack(fill='both',expand=True, side='left')
+        scrollbar.pack(fill='y', side='right')
+
 
     def submitRatings(self, movies, ratings, newWindow):
         for i in range(len(ratings)):
