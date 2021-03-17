@@ -11,6 +11,7 @@ import math
 from sklearn.neighbors import NearestNeighbors, KNeighborsClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+from tkinter.scrolledtext import ScrolledText
 
 
 #
@@ -216,13 +217,39 @@ class UI:
             error_label.grid(row=4)
         else:
             newWindow.withdraw()
-            self.bs_recommend.recommend_movie_by_genre(found_movie, 5)
-            #self.recommend_rating(found_movie)
+            #self.bs_recommend.recommend_movie_by_genre(found_movie, 5)
+            self.input_genre(found_movie)
     
-    def input_genre(self):
+    def input_genre(self, movie):
+        genre_movies = self.bs_recommend.recommend_movie_by_genre(movie, 20)
         # not supported yet
-        return None
-    
+        newWindow = Toplevel(self.window)
+        newWindow.geometry('650x500')
+        canvas = tk.Canvas(newWindow)
+        scrollbar = tk.Scrollbar(newWindow, orient="vertical")
+        mov_output = tk.Listbox(newWindow, width=80, height=20, yscrollcommand=scrollbar.set)
+        scrollbar = Scrollbar(newWindow, orient=VERTICAL, command=canvas.yview)
+        frame = Frame(canvas)
+        tk.Label(frame, text="Since you liked the movie {}, we recommend watching the following movies that have similar genres:".format(movie.get_title())).pack()
+
+        tk.Button(frame, text="Close", command=lambda : newWindow.destroy()).pack()
+        i=0
+        for index, moviess in genre_movies.iterrows():
+            #print (moviess["movie title"], moviess["genre"], moviess["rating"])
+            mov_output.insert(i, moviess[0])
+            i += 1
+
+
+        #mov_output.insert(1, genre_movies)
+        canvas.create_window(0,0,anchor='nw',window=frame)
+        canvas.update_idletasks()
+        canvas.configure(scrollregion=canvas.bbox('all'),yscrollcommand=scrollbar.set)
+        canvas.pack(fill='both',expand=True, side='left')
+        scrollbar.pack(fill='y', side='right')
+        mov_output.pack(fill="both", expand=True)
+        mov_output.place(relx = 0.5, rely = 0.5, anchor="center")
+
+
     def recommend_movie(self, genre):
         # not supported yet
         return
