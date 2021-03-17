@@ -209,9 +209,6 @@ class UI:
         canvas = tk.Canvas(newWindow)
         scrollbar = Scrollbar(newWindow, orient=VERTICAL, command=canvas.yview)
         frame = Frame(canvas)
-        
-        
-
 
         tk.Label(frame, text="Please Input ratings for the following movies:").pack()
         ratings = []
@@ -242,7 +239,7 @@ class UI:
             else:
                 # empty means didn't watch, record as NaN
                 r = np.nan
-            self.bs_user.add_user_rating(self.user.get_id(), int(movies["movie_id"].iloc[i]), r)
+            self.bs_rating.add_user_rating(self.user.get_id(), int(movies["movie_id"].iloc[i]), r)
         newWindow.destroy()
     
     
@@ -287,10 +284,6 @@ class UI:
             if self.user.get_id() <= 943:
                 print("not allowed to update rating for dataset users")
                 return 
-
-            # if not self.bs_rating.is_app_user(self.user.get_id()):
-            #     print("not allowed to update rating for dataset users")
-            #     return
 
             self.input_ratings(movies) 
 
