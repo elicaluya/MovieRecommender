@@ -53,7 +53,7 @@ class App:
 
 def main():
     app = App()
-    app.configure(60, "cosine", 10)
+    app.configure(4, "cosine", 10)
     app.run()
 
     ###For testing genre based
