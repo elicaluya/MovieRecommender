@@ -19,7 +19,7 @@ class MovieData:
 
         if df_movie_genre is None:
             # Reading data for testing the genre recommender method
-            self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
+            self.df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv", encoding='latin-1')
         else:
             self.df_movie_genre = df_movie_genre
 

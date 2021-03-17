@@ -44,7 +44,7 @@ class UI:
         # Main Menu elements
         self.new_button.pack()
         self.by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
-        self.by_genre = tk.Button(self.window, text="Recommend Movie by Genre")
+        self.by_genre = tk.Button(self.window, text="Recommend Movie by Genre", command=lambda : self.rec_genre_window())
         self.chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
         self.quit_button = tk.Button(self.window, text="Quit", command=lambda : self.window.destroy())
         self.quit_button.pack()
@@ -181,6 +181,20 @@ class UI:
         submit_btn.grid(row=3, column=1)
         back_btn = tk.Button(newWindow, text="Back", command=lambda : newWindow.destroy())
         back_btn.grid(row=4, column=1)
+
+    # Method to display recommend by genre window
+    def rec_genre_window(self):
+        newWindow = Toplevel(self.window)
+        label = tk.Label(newWindow, text="Recommend By Gebre:")
+        label.grid(row=0)
+        movie_label = tk.Label(newWindow, text="Movie Title:")
+        movie_label.grid(row=1)
+        self.movie_entry = tk.Entry(newWindow)
+        self.movie_entry.grid(row=1, column=1)
+        submit_btn = tk.Button(newWindow, text="Submit", command=lambda : self.genre_input_movie(newWindow))
+        submit_btn.grid(row=3, column=1)
+        back_btn = tk.Button(newWindow, text="Back", command=lambda : newWindow.destroy())
+        back_btn.grid(row=4, column=1)
     
     def input_movie(self, newWindow):
         movie = self.movie_entry.get()
@@ -192,6 +206,18 @@ class UI:
         else:
             newWindow.withdraw()
             self.recommend_rating(found_movie)
+
+    def genre_input_movie(self, newWindow):
+        movie = self.movie_entry.get()
+        found_movie = self.bs_movie.get_movie_by_title(movie)
+        error_label = tk.Label(newWindow)
+        if not found_movie:
+            error_label.config(text="Error: Movie Not Found")
+            error_label.grid(row=4)
+        else:
+            newWindow.withdraw()
+            self.bs_recommend.recommend_movie_by_genre(found_movie, 5)
+            #self.recommend_rating(found_movie)
     
     def input_genre(self):
         # not supported yet
