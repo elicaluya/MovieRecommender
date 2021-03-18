@@ -235,7 +235,7 @@ class UI:
             self.input_genre(found_movie)
     
     def input_genre(self, movie):
-        genre_movies = self.bs_recommend.recommend_movie_by_genre(movie, 20)
+        genre_movies = self.bs_recommend.recommend_movie_by_genre(movie.get_id(), 20)
         # not supported yet
         newWindow = Toplevel(self.window)
         newWindow.geometry('650x500')

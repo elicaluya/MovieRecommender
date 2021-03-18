@@ -56,11 +56,11 @@ class RecommendService:
         if _DEBUG: print("estimated rating:", avg_rating)
         return avg_rating
 
-    def recommend_movie_by_genre(self, movie_title, n_recommended_movie):
+    def recommend_movie_by_genre(self, movie_id, n_recommended_movie):
         """Recommends movies by given movie genres.
 
         Args:
-            movie_title: movie title (full length)
+            movie_id: movie id (not index of the table)
             n_recommended_movie: number of recommended movie
 
         Returns:
@@ -68,6 +68,6 @@ class RecommendService:
         """
         df = self.movie_data.get_genre_dataset()
         self.genre.fit(df)
-        movies = self.genre.predict(movie_title, n_recommended_movie)
+        movies = self.genre.predict(movie_id, n_recommended_movie)
         print("recommended movies by genre:\n", movies)
         return movies
