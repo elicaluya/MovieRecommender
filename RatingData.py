@@ -84,7 +84,7 @@ class RatingData:
             A list of movie index not rated by user.
         """
         zero_ratings = self.df_ratmat.apply(pd.Series.value_counts).iloc[0, 1:]
-        user_rated_movies = self.get_valid_user_ratings(user_id)["item_id"]
+        user_rated_movies = self.get_user_ratings(user_id)["item_id"]
         most_watched_movies_not_rated = zero_ratings[
             zero_ratings.index.isin(user_rated_movies.astype(int).astype(str)) != True].sort_values().head(count)
         return most_watched_movies_not_rated.index
@@ -114,3 +114,15 @@ class RatingData:
             Mean ratings for given movies
         """
         return self.df_data[self.df_data["item_id"].isin(movie_ids)].groupby("item_id").mean()
+
+
+    def get_user_ratings(self, user_id):
+        """Finds valid (> 0) ratings for given user in the app data including NaN values.
+
+        Args:
+            user_id: unique user id
+
+        Returns:
+            A data frame for user_id, item_id, rating
+        """
+        return self.df_app_data.loc[(self.df_app_data["user_id"] == int(user_id))]

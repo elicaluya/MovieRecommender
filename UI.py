@@ -47,6 +47,7 @@ class UI:
         self.by_rating = tk.Button(self.window, text="Recommend Movie by Rating", command=lambda : self.rec_rating_window())
         self.by_genre = tk.Button(self.window, text="Recommend Movie by Genre", command=lambda : self.rec_genre_window())
         self.chg_user = tk.Button(self.window, text="Change User", command=lambda : self.return_user_window())
+        self.create_user = tk.Button(self.window, text="Create New User", command=lambda : self.new_user())
         self.quit_button = tk.Button(self.window, text="Quit", command=lambda : self.window.destroy())
         self.quit_button.pack()
         # Analysis elements
@@ -56,9 +57,10 @@ class UI:
         self.user_status = tk.Label(self.window)
         self.ratings = tk.Label(self.window)
         self.movies_label = tk.Label(self.window, text="Movies:")
-        self.movies = st.ScrolledText(self.window, width=50, height=10,font=("Times New Roman", 10))
+        self.movies = st.ScrolledText(self.window, width=75, height=20,font=("Times New Roman", 10))
       
-        
+    
+    # Displays main menu buttons after login or user creation window
     def show_menu(self):
         self.return_button.pack_forget()
         self.new_button.pack_forget()
@@ -71,6 +73,7 @@ class UI:
         self.user_info.pack()
         self.quit_button.pack()
 
+    # Clears the output section in the main menu
     def clear_output(self):
         self.status_label.pack_forget()
         self.user_info.pack_forget()
@@ -79,6 +82,17 @@ class UI:
         self.ratings.pack_forget()
         self.movies_label.pack_forget()
         self.movies.pack_forget()
+
+    # Clears all of the widgets in a window
+    def clear_input_ratings(self, newWindow):
+        widget_list = newWindow.winfo_children()
+
+        for item in widget_list:
+            if item.winfo_children():
+                widget_list.extend(item.winfo_children())
+
+        for item in widget_list:
+            item.pack_forget()
     
     # Function to update the status label
     def update_status(self, status, info):
@@ -186,7 +200,7 @@ class UI:
     # Method to display recommend by genre window
     def rec_genre_window(self):
         newWindow = Toplevel(self.window)
-        label = tk.Label(newWindow, text="Recommend By Gebre:")
+        label = tk.Label(newWindow, text="Recommend By Genre:")
         label.grid(row=0)
         movie_label = tk.Label(newWindow, text="Movie Title:")
         movie_label.grid(row=1)
@@ -254,26 +268,29 @@ class UI:
         # not supported yet
         return
     
-    def input_ratings(self, movies):
-        # take rating information from user
-        newWindow = Toplevel(self.window)
-        newWindow.geometry('500x500')
+
+
+    # Window for user to input ratings of movies they have seen
+    def input_ratings(self, movies, current_movie, newWindow):
+        # Clear window output
+        self.clear_input_ratings(newWindow)
         
         canvas = tk.Canvas(newWindow)
         scrollbar = Scrollbar(newWindow, orient=VERTICAL, command=canvas.yview)
         frame = Frame(canvas)
 
-        tk.Label(frame, text="Please Input ratings for the following movies:").pack()
+        # take rating information from user
+        tk.Label(frame, text="Please Input ratings for the following movies or leave blank if not seen:").pack()
         ratings = []
         for i, movie in movies.iterrows():
             ttk.Label(frame, text=movie["title"]).pack()
             n = tk.StringVar()
             rating_input = ttk.Combobox(frame,textvariable=n)
-            rating_input['values'] = ('0','1','2','3','4','5')
+            rating_input['values'] = ('','0','1','2','3','4','5')
             rating_input.pack()
             ratings.append(rating_input)
 
-        tk.Button(frame, text="Submit", command=lambda : self.submitRatings(movies, ratings, newWindow)).pack()
+        tk.Button(frame, text="Submit", command=lambda : self.submitRatings(movies, ratings, newWindow, current_movie)).pack()
         tk.Button(frame, text="Close", command=lambda : newWindow.destroy()).pack()
 
         canvas.create_window(0,0,anchor='nw',window=frame)
@@ -283,7 +300,9 @@ class UI:
         scrollbar.pack(fill='y', side='right')
 
 
-    def submitRatings(self, movies, ratings, newWindow):
+
+    # Submit the ratings from user. If doesn't meet number of movies that need a rating, continue to ask user for ratings
+    def submitRatings(self, movies, ratings, newWindow, current_movie):
         for i in range(len(ratings)):
             rate = ratings[i].get()
             if rate.isnumeric():
@@ -293,52 +312,78 @@ class UI:
                 # empty means didn't watch, record as NaN
                 r = np.nan
             self.bs_rating.add_user_rating(self.user.get_id(), int(movies["movie_id"].iloc[i]), r)
-        newWindow.destroy()
-    
-    
-    def recommend_rating(self, movie):
+
         found_ratings = self.bs_rating.get_valid_user_ratings(self.user.get_id())
         count = found_ratings.shape[0]
-        self.user_count.config(text="user count = %d" %count)
+        self.user_count.config(text="User Count = %d" %count)
         self.user_count.pack()
+
+        # If the user still has not entered enough ratings, keep asking them to rate movies they have seen
         if count >= self.num_of_movie_need_rating:
-            self.user_status.config(text="user rating count is bigger than needed, here's the expected rating for your movie: {}".format(movie.get_title()))
+            self.recommend_rating(current_movie)
+            newWindow.destroy()
+        else:
+            newMovies = self.get_movie_ratings(count)
+            self.input_ratings(newMovies, current_movie, newWindow)
+
+        
+
+    # Get the top movie ratings and their average ratings
+    def get_movie_ratings(self, count):
+        movie_ratings = []
+        self.movies.config(state=tk.NORMAL)
+        self.movies.delete('1.0', END)
+        # finds movies most watched by others that user has not seen
+        movies = self.bs_movie.get_most_watched_movie(
+                    self.user.get_id(),
+                    math.ceil((self.num_of_movie_need_rating - count) * 1.5))
+        for index, row in movies.iterrows():
+            movie_info = "{} | {} | {} => ".format(row["movie_id"], row["title"], row["release_date"])
+            movie_ratings.append(movie_info)
+        # their average ratings?
+        ratings = self.bs_rating.get_average_ratings_of_movies(movies["movie_id"])
+            
+        mv_index = 0
+        for index, row in ratings.iterrows():
+            rating_info = "{}\n\n".format(row["rating"])
+            movie_ratings[mv_index] += rating_info
+        
+            self.movies.insert(tk.INSERT, movie_ratings[mv_index])
+            mv_index += 1
+    
+        self.movies.config(state=tk.DISABLED)
+        self.movies_label.pack()
+        self.movies.pack()
+
+        return movies
+    
+    
+    # Recommend the rating of movie based on movies the user has rated and other ratings
+    def recommend_rating(self, movie):
+        self.clear_output()
+        found_ratings = self.bs_rating.get_valid_user_ratings(self.user.get_id())
+        count = found_ratings.shape[0]
+        self.user_count.config(text="User Count = %d" %count)
+        self.user_count.pack()
+        
+        if count >= self.num_of_movie_need_rating:
+            self.user_status.config(text="User rating count is bigger than needed, here's the expected rating for your movie: {}".format(movie.get_title()))
             self.user_status.pack()
             self.ratings.config(text=self.bs_recommend.recommend_rating(self.user.get_id(), movie.get_id(), self.app_ref.knn_n_neighbor))
             self.ratings.pack()
         else:
-            self.user_status.config(text="user rating count is less than needed, please input your rating for the following movie: {}".format(movie.get_title()))
+            self.user_status.config(text="User rating count is less than needed, please input your rating for the following movie: {}".format(movie.get_title()))
             self.user_status.pack()
-            movie_ratings = []
-            self.movies.config(state=tk.NORMAL)
-            self.movies.delete('1.0', END)
-            # finds movies most watched by others
-            movies = self.bs_movie.get_most_watched_movie(
-                     self.user.get_id(),
-                     math.ceil((self.num_of_movie_need_rating - count) * 1.5))
-            for index, row in movies.iterrows():
-                movie_info = "{} | {} | {} => ".format(row["movie_id"], row["title"], row["release_date"])
-                movie_ratings.append(movie_info)
-            # their average ratings?
-            ratings = self.bs_rating.get_average_ratings_of_movies(movies["movie_id"])
-            
-            mv_index = 0
-            for index, row in ratings.iterrows():
-                rating_info = "{}\n\n".format(row["rating"])
-                movie_ratings[mv_index] += rating_info
-        
-                self.movies.insert(tk.INSERT, movie_ratings[mv_index])
-                mv_index += 1
-    
-            self.movies.config(state=tk.DISABLED)
-            self.movies_label.pack()
-            self.movies.pack()
+            movies = self.get_movie_ratings(count)
 
             if self.user.get_id() <= 943:
                 print("not allowed to update rating for dataset users")
                 return 
 
-            self.input_ratings(movies) 
+            newWindow = Toplevel(self.window)
+            newWindow.geometry('500x500')
+            self.input_ratings(movies, movie, newWindow) 
+
 
     def run(self):
         self.log_in()
