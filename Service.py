@@ -76,18 +76,19 @@ class RecommendService:
     def __init__(self, recommend_service):
         self.recommend_service = recommend_service
 
-    def recommend_rating(self, user_id, movie_id, n_neighbor):
+    def recommend_rating(self, user_id, movie_id, n_neighbor, user_vector=None):
         """Estimates rating for given user and movie.
 
         Args:
             user_id: user id (not index of the table)
             movie_id: movie id (not index of the table)
             n_neighbor: number of K value for Knn
+            user_vector: custom user rating vector to be used
 
         Returns:
             Weight averaged rating.
         """
-        return self.recommend_service.recommend_rating(user_id, movie_id, n_neighbor)
+        return self.recommend_service.recommend_rating(user_id, movie_id, n_neighbor, user_vector)
     
     def recommend_movie_by_genre(self, movie_title, n_recommended_movie):
         """Recommends movies by given movie genres.

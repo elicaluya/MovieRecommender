@@ -11,13 +11,14 @@ class RecommendService:
         self.knn = knn
         self.genre = genre
 
-    def recommend_rating(self, user_id, movie_id, n_neighbor):
+    def recommend_rating(self, user_id, movie_id, n_neighbor, user_vector=None):
         """Estimates rating for given user and movie.
 
         Args:
             user_id: user id (not index of the table)
             movie_id: movie id (not index of the table)
             n_neighbor: number of K value for Knn
+            user_vector: custom user rating vector to be used
 
         Returns:
             Weight averaged rating.
@@ -32,7 +33,10 @@ class RecommendService:
             # no user to compute rating estimation
             if _DEBUG: print("Found no users have rating, returning 0")
             return 0.0
-        df = self.rating_data.get_user_vector(user_id)
+        if user_vector is None:
+            df = self.rating_data.get_user_vector(user_id)
+        else:
+            df = user_vector
         if _DEBUG: print("app user ratings:", df)
         self.knn.fit(np.mat(user_w_movie), n_neighbor)
         nbrs = self.knn.predict(df)
