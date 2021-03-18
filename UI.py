@@ -32,9 +32,6 @@ class UI:
         self.bs_recommend = bs_recommend
         self.bs_rating = bs_rating
 
-    def user_input(self, prompt):
-        val = input(prompt)
-        return val
     
     # Starting window asking for new or returning user
     def log_in(self):
@@ -60,7 +57,7 @@ class UI:
         self.movies = st.ScrolledText(self.window, width=75, height=20,font=("Times New Roman", 10))
       
     
-    # Displays main menu buttons after login or user creation window
+    # Displays main menu buttons after login or user creation on the main window
     def show_menu(self):
         self.return_button.pack_forget()
         self.new_button.pack_forget()
@@ -68,7 +65,7 @@ class UI:
         self.by_rating.pack()
         self.by_genre.pack()
         self.chg_user.pack()
-        self.chg_user.pack()
+        self.create_user.pack()
         self.status_label.pack()
         self.user_info.pack()
         self.quit_button.pack()
@@ -260,11 +257,6 @@ class UI:
         scrollbar.pack(fill='y', side='right')
         mov_output.pack(fill="both", expand=True)
         mov_output.place(relx = 0.5, rely = 0.5, anchor="center")
-
-
-    def recommend_movie(self, genre):
-        # not supported yet
-        return
     
 
 
@@ -273,6 +265,7 @@ class UI:
         # Clear window output
         self.clear_input_ratings(newWindow)
         
+        # Create frame and canvas for scrollbar
         canvas = tk.Canvas(newWindow)
         scrollbar = Scrollbar(newWindow, orient=VERTICAL, command=canvas.yview)
         frame = Frame(canvas)
@@ -291,6 +284,7 @@ class UI:
         tk.Button(frame, text="Submit", command=lambda : self.submitRatings(movies, ratings, newWindow, current_movie)).pack()
         tk.Button(frame, text="Close", command=lambda : newWindow.destroy()).pack()
 
+        # Make the window have a scrollbar if there are a lot of movies to rate
         canvas.create_window(0,0,anchor='nw',window=frame)
         canvas.update_idletasks()
         canvas.configure(scrollregion=canvas.bbox('all'),yscrollcommand=scrollbar.set)
@@ -311,15 +305,17 @@ class UI:
                 r = np.nan
             self.bs_rating.add_user_rating(self.user.get_id(), int(movies["movie_id"].iloc[i]), r)
 
+        # Update the count of the number of ratings by the user
         found_ratings = self.bs_rating.get_valid_user_ratings(self.user.get_id())
         count = found_ratings.shape[0]
         self.user_count.config(text="User Count = %d" %count)
         self.user_count.pack()
 
-        # If the user still has not entered enough ratings, keep asking them to rate movies they have seen
+        # When the user has enough ratings, get the prediction
         if count >= self.num_of_movie_need_rating:
             self.recommend_rating(current_movie)
             newWindow.destroy()
+        # If the user still has not entered enough ratings, keep asking them to rate movies they have seen
         else:
             newMovies = self.get_movie_ratings(count)
             self.input_ratings(newMovies, current_movie, newWindow)
@@ -338,9 +334,10 @@ class UI:
         for index, row in movies.iterrows():
             movie_info = "{} | {} | {} => ".format(row["movie_id"], row["title"], row["release_date"])
             movie_ratings.append(movie_info)
-        # their average ratings?
+        # their average ratings
         ratings = self.bs_rating.get_average_ratings_of_movies(movies["movie_id"])
-            
+        
+        # Update the textbox with the new movies that need a rating    
         mv_index = 0
         for index, row in ratings.iterrows():
             rating_info = "{}\n\n".format(row["rating"])
@@ -364,11 +361,13 @@ class UI:
         self.user_count.config(text="User Count = %d" %count)
         self.user_count.pack()
         
+        # User has submitted enough ratings to get a predicted rating
         if count >= self.num_of_movie_need_rating:
             self.user_status.config(text="User rating count is bigger than needed, here's the expected rating for your movie: {}".format(movie.get_title()))
             self.user_status.pack()
             self.ratings.config(text=self.bs_recommend.recommend_rating(self.user.get_id(), movie.get_id(), self.app_ref.knn_n_neighbor))
             self.ratings.pack()
+        # The user needs to add more ratings in order to get a prediction
         else:
             self.user_status.config(text="User rating count is less than needed, please input your rating for the following movie: {}".format(movie.get_title()))
             self.user_status.pack()
