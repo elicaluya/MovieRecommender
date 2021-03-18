@@ -182,6 +182,7 @@ class UI:
     
     # Method to display recommend by rating window
     def rec_rating_window(self):
+        #new window on top with the labels defined in below code
         newWindow = Toplevel(self.window)
         label = tk.Label(newWindow, text="Recommend By Rating:")
         label.grid(row=0)
@@ -189,6 +190,7 @@ class UI:
         movie_label.grid(row=1)
         self.movie_entry = tk.Entry(newWindow)
         self.movie_entry.grid(row=1, column=1)
+        #button to execute function
         submit_btn = tk.Button(newWindow, text="Submit", command=lambda : self.input_movie(newWindow))
         submit_btn.grid(row=3, column=1)
         back_btn = tk.Button(newWindow, text="Back", command=lambda : newWindow.destroy())
@@ -196,6 +198,7 @@ class UI:
 
     # Method to display recommend by genre window
     def rec_genre_window(self):
+        #new window on top with the labels defined in below code
         newWindow = Toplevel(self.window)
         label = tk.Label(newWindow, text="Recommend By Genre:")
         label.grid(row=0)
@@ -203,15 +206,20 @@ class UI:
         movie_label.grid(row=1)
         self.movie_entry = tk.Entry(newWindow)
         self.movie_entry.grid(row=1, column=1)
+        #button to execute function
         submit_btn = tk.Button(newWindow, text="Submit", command=lambda : self.genre_input_movie(newWindow))
         submit_btn.grid(row=3, column=1)
         back_btn = tk.Button(newWindow, text="Back", command=lambda : newWindow.destroy())
         back_btn.grid(row=4, column=1)
     
     def input_movie(self, newWindow):
+        #get movie title input from user
         movie = self.movie_entry.get()
+        #check if movie exists in dataset
         found_movie = self.bs_movie.get_movie_by_title(movie)
+        #label to be presented if movie title is invalid
         error_label = tk.Label(newWindow)
+        #if movie not found, let user know. else, continue 
         if not found_movie:
             error_label.config(text="Error: Movie Not Found")
             error_label.grid(row=4)
@@ -220,20 +228,29 @@ class UI:
             self.recommend_rating(found_movie)
 
     def genre_input_movie(self, newWindow):
+        #get movie title input from user
         movie = self.movie_entry.get()
+        #check if movie exists in dataset
         found_movie = self.bs_movie.get_movie_by_title(movie)
+        #label to be presented if movie title is invalid
         error_label = tk.Label(newWindow)
+        #if movie not found, let user know. else, continue 
         if not found_movie:
             error_label.config(text="Error: Movie Not Found")
             error_label.grid(row=4)
         else:
             newWindow.withdraw()
-            #self.bs_recommend.recommend_movie_by_genre(found_movie, 5)
             self.input_genre(found_movie)
     
     def input_genre(self, movie):
+<<<<<<< Updated upstream
         genre_movies = self.bs_recommend.recommend_movie_by_genre(movie.get_id(), 20)
         # not supported yet
+=======
+        #get and store list of similar movies based on genre
+        genre_movies = self.bs_recommend.recommend_movie_by_genre(movie, 20)
+        #set up window and listbox to display results
+>>>>>>> Stashed changes
         newWindow = Toplevel(self.window)
         newWindow.geometry('650x500')
         canvas = tk.Canvas(newWindow)
@@ -244,9 +261,9 @@ class UI:
         tk.Label(frame, text="Since you liked the movie {}, we recommend watching the following movies that have similar genres:".format(movie.get_title())).pack()
 
         tk.Button(frame, text="Close", command=lambda : newWindow.destroy()).pack()
+        #loop through list of similar movies and print to listbox
         i=0
         for index, moviess in genre_movies.iterrows():
-            #print (moviess["movie title"], moviess["genre"], moviess["rating"])
             mov_output.insert(i, moviess[0])
             i += 1
 
