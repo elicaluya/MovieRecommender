@@ -253,8 +253,6 @@ class UI:
             mov_output.insert(i, moviess[0])
             i += 1
 
-
-        #mov_output.insert(1, genre_movies)
         canvas.create_window(0,0,anchor='nw',window=frame)
         canvas.update_idletasks()
         canvas.configure(scrollregion=canvas.bbox('all'),yscrollcommand=scrollbar.set)

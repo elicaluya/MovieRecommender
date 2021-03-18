@@ -56,10 +56,5 @@ def main():
     app.configure(60, "cosine", 10)
     app.run()
 
-    ###For testing genre based
-    # df_movie_genre = pd.read_csv("movielens/Movielens-02/movies_w_genre.csv")
-    # genre_test = Genre_Based("Toy Story (1995)", df_movie_genre)
-    # genre_test.genre_recommender()
-
 if __name__ == "__main__":
     main()

@@ -272,11 +272,6 @@ class Genre_Based:
         #vectorizer to be used when creating the tfidf matrix
     def tfidf_prep(self):
         tfidf_movies_genres = TfidfVectorizer(token_pattern = '[a-zA-Z0-9\-]+')
-# <<<<<<< HEAD
-        #replacing empty values
-        self.dataset['genres'] = self.dataset['genres'].replace(to_replace="(no genres listed)", value="")
-# =======
-# >>>>>>> 9b4617f5d6204d3d782bf56cdf394d6a456fc5ba
         #creating the tfidf matrix
         tfidf_movies_genres_matrix = tfidf_movies_genres.fit_transform(self.dataset['genres'])
         #computing the cosine similarity
