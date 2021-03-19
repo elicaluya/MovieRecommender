@@ -1,17 +1,17 @@
-Movie Recommender System
+#Movie Recommender System
 
-Libraries needed to run the program:
+###Libraries needed to run the program:
 - numpy
 - pandas
 - scikitlearn
 - tkinter
 
 
-To run in command line:
+###To run in command line:
 python App.py
 
 
-Instructions for System:
+###Instructions for System:
 1) Either create New User or enter User ID of returning user
 2) Choose to get recommendation by rating or genre
 3) Enter Movie Title (i.e. Toy Story (1995))
