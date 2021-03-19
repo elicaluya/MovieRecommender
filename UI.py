@@ -243,14 +243,10 @@ class UI:
             self.input_genre(found_movie)
     
     def input_genre(self, movie):
-<<<<<<< Updated upstream
         genre_movies = self.bs_recommend.recommend_movie_by_genre(movie.get_id(), 20)
-        # not supported yet
-=======
         #get and store list of similar movies based on genre
         genre_movies = self.bs_recommend.recommend_movie_by_genre(movie, 20)
         #set up window and listbox to display results
->>>>>>> Stashed changes
         newWindow = Toplevel(self.window)
         newWindow.geometry('650x500')
         canvas = tk.Canvas(newWindow)
