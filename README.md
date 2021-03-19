@@ -12,7 +12,7 @@ python App.py
 
 
 ### Instructions for System:
-1) Either create New User or enter User ID of returning user
+1) Either create New User or enter User ID of returning user (e.g. 944 - this user has all 60 ratings)
 2) Choose to get recommendation by rating or genre
 3) Enter Movie Title (i.e. Toy Story (1995))
     - if user chose rating:
