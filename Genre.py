@@ -1,5 +1,9 @@
 #!/usr/bin/python
+"""TFxIDF model component module.
 
+This module includes a TF-IDF(Genre) class representing TFxIDF algorith wrapper object,
+which is providing convenient fit & predict standard method to the clients as a contents based filtration.
+"""
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 

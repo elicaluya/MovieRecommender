@@ -52,7 +52,7 @@ class App:
 
         # configure backend service objects
         user_service = us.UserService(user_data, app_user_data)
-        movie_service = ms.MovieService(movie_data, user_service, rating_data)
+        movie_service = ms.MovieService(movie_data, rating_data)
         recommend_service = cs.RecommendService(rating_data, movie_data, user_data, app_user_data, knn, genre)
         rating_service = rs.RatingService(rating_data, movie_data, user_data, app_user_data)
 

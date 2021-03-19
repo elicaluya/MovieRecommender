@@ -1,32 +1,51 @@
+"""Rating data layer object module.
+
+This module provides low level access to data layer rating dataset handling.
+"""
 import pandas as pd
 import numpy as np
 
 
 class RatingData:
     def __init__(self, df_data = None, df_ratmat = None, df_app_data = None):
+        """Constructor, reads dataset files or use given dataset for rating and matrix information.
+
+        Args:
+            df_data: custom rating information dataset
+            df_ratmat: custom user x movie rating information dataset
+            df_app_data: custom app user rating information dataset
+        """
+        # base rating information dataset
         if df_data is None:
+            # use base dataset read from file
             self.df_data = pd.read_csv(
                 "movielens/Movielens-02/u.data",
                 delimiter="\t",
                 names=['user_id', 'item_id', 'rating', 'timestamp'])
         else:
+            # use given custom dataset
             self.df_data = df_data
         
+        # user x movie rating information dataset
         if df_ratmat is None:
+            # use base dataset read from file
             self.df_ratmat = pd.read_csv(
                 "movielens/Movielens-02/data_matrix.csv", index_col=0)
         else:
+            # use given custom dataset
             self.df_ratmat = df_ratmat
 
+        # app user rating information dataset
         if df_app_data is None:
-            # read user rating data
+            # use base dataset read from file
             try:
                 self.df_app_data = pd.read_csv("app_data.csv")
             except FileNotFoundError as e:
-                # start with empty set
+                # start with empty set, if not found
                 self.df_app_data = pd.DataFrame(
                     columns=['user_id', 'item_id', 'rating', 'timestamp'])
         else:
+             # use given custom dataset
             self.df_app_data = df_app_data
 
     def get_valid_user_ratings(self, user_id):
@@ -61,8 +80,9 @@ class RatingData:
             A data frame representing user rating vector
         """
         if user_id in self.df_ratmat.index:
-            # user from dataset
+            # user from base dataset
             return np.array([self.df_ratmat.loc[user_id]])
+        # construct a vector out of app user rating data
         movies_rated = self.get_valid_user_ratings(user_id)
         movie_size = self.df_ratmat.shape[1]
         cols = [str(i) for i in range(1, movie_size + 1)]
@@ -71,6 +91,7 @@ class RatingData:
         for i, r in movies_rated[['item_id', 'rating']].iterrows():
             new_row[str(int(r['item_id']))] = int(r['rating'])
         df = df.append(new_row, ignore_index=True)
+        # mark 0 (=not rated) if not rated by the user
         return df.fillna(0)
 
     def get_most_watched_movie_index(self, user_id, count):
@@ -83,6 +104,9 @@ class RatingData:
         Returns:
             A list of movie index not rated by user.
         """
+        # find most watched movie by 0 rating count on each movie,
+        # then sorted out increasing order which indicates which movie has least 0 ratings
+        # meaning most watched movie.
         zero_ratings = self.df_ratmat.apply(pd.Series.value_counts).iloc[0, 1:]
         user_rated_movies = self.get_user_ratings(user_id)["item_id"]
         most_watched_movies_not_rated = zero_ratings[

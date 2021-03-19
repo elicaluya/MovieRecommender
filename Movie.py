@@ -1,5 +1,7 @@
 """Global structure for movie object shared by all the components. 
-It represents a simple container object for movie attributes."""
+It represents a simple container object for movie attributes as of now.
+But possibly in a bigger system, it may present full sized message structure."""
+
 class Movie:
     def __init__(self, id, title, genre):
         """Constructor for a Movie object by given attributes.

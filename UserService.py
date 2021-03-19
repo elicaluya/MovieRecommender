@@ -1,5 +1,17 @@
+"""User service layer object module.
+
+This module includes a class representing service related with user data.
+It links to data layer object to deliver the functionality.
+"""
+
 class UserService:
     def __init__(self, user_data, app_user_data):
+        """Constructor, it connects data objects in lower level operation layer.
+
+        Args:
+            user_data: base user dataset module
+            app_user_data: app user dataset module
+        """
         self.user_data = user_data
         self.app_user_data = app_user_data
 

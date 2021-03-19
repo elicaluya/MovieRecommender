@@ -1,3 +1,10 @@
+"""Interface/RPC service layer object module.
+
+This module connects front end and backend components.
+It presents a thin service layer to the client(frontend) as of now.
+It subdivided into four different service groups.
+"""
+
 class MovieService:
     def __init__(self, movie_service):
         self.movie_service = movie_service

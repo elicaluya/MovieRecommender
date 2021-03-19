@@ -1,7 +1,18 @@
+"""Movie service layer object module.
+
+This module includes a class representing service related with movie data.
+It links to data layer object to deliver the functionality.
+"""
+
 class MovieService:
-    def __init__(self, movie_data, user_service, rating_data):
+    def __init__(self, movie_data, rating_data):
+        """Constructor, it connects data objects in lower level operation layer.
+
+        Args:
+            movie_data: movie dataset module
+            rating_data: rating dataset module
+        """
         self.movie_data = movie_data
-        self.user_service = user_service
         self.rating_data = rating_data
 
     def get_most_watched_movies(self, user_id, count):

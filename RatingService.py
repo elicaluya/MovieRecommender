@@ -1,5 +1,19 @@
+"""Rating service layer object module.
+
+This module includes a class representing service related with rating data.
+It links to data layer object to deliver the functionality.
+"""
+
 class RatingService:
     def __init__(self, rating_data, movie_data, user_data, app_user_data):
+        """Constructor, it connects data objects in lower level operation layer.
+
+        Args:
+            rating_data: rating dataset module
+            movie_data: movie dataset module
+            user_data: base user dataset module
+            app_user_data: app user dataset module
+        """
         self.rating_data = rating_data
         self.movie_data = movie_data
         self.user_data = user_data
